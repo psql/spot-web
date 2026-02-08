@@ -22,50 +22,67 @@
         </header>
 
         <div class="main-content">
-            <!-- Hand Control Panel - FEATURED -->
-            <section class="panel hand-control-panel featured-panel">
-                <h2>🖐️ Hand Control - Puppet Spot in Real-Time</h2>
-                <div class="hand-controls">
-                    <div class="hand-toggle-header">
+            <!-- Live Pose Control - LIGHTWEIGHT -->
+            <section class="panel pose-control-panel featured-panel">
+                <h2>🎮 Live Pose Control - Real-Time Puppeteering</h2>
+                <div class="live-pose-controls">
+                    <div class="pose-toggle-header">
                         <label class="toggle-switch toggle-large">
-                            <input type="checkbox" id="hand-control-toggle" disabled>
+                            <input type="checkbox" id="live-pose-toggle" disabled>
                             <span class="toggle-slider"></span>
-                            <span class="toggle-label">Enable Hand Tracking</span>
+                            <span class="toggle-label">Enable Live Pose Control</span>
                         </label>
-                        <div class="hand-status-badge">
-                            <span id="hand-status">Camera Off</span>
+                        <div class="pose-mode-select">
+                            <select id="pose-mode" disabled>
+                                <option value="keyboard">Keyboard (Arrow Keys)</option>
+                                <option value="mouse">Mouse Movement</option>
+                                <option value="gamepad">Gamepad (if connected)</option>
+                            </select>
                         </div>
                     </div>
 
-                    <div class="hand-preview-large">
-                        <video id="hand-video" autoplay playsinline></video>
-                        <canvas id="hand-canvas"></canvas>
-                        <div class="hand-overlay-info">
+                    <div class="pose-display-large">
+                        <div class="pose-visualizer">
+                            <div class="pose-robot-icon">
+                                <div class="robot-body" id="robot-visual" style="transform: rotateZ(0deg) rotateX(0deg) rotateY(0deg)">
+                                    🤖
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pose-overlay-info">
                             <div class="orientation-display">
                                 <div class="orientation-item roll">
                                     <label>Roll</label>
-                                    <span id="hand-roll">0.0°</span>
+                                    <span id="pose-roll">0.0°</span>
                                 </div>
                                 <div class="orientation-item pitch">
                                     <label>Pitch</label>
-                                    <span id="hand-pitch">0.0°</span>
+                                    <span id="pose-pitch">0.0°</span>
                                 </div>
                                 <div class="orientation-item yaw">
                                     <label>Yaw</label>
-                                    <span id="hand-yaw">0.0°</span>
+                                    <span id="pose-yaw">0.0°</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="hand-controls-settings">
-                        <div class="hand-param-large">
-                            <label>Sensitivity:</label>
-                            <input type="range" id="hand-sensitivity" min="0.5" max="2.0" step="0.1" value="1.0" disabled>
-                            <span id="hand-sensitivity-val">1.0x</span>
+                    <div class="pose-controls-help">
+                        <h3>Keyboard Controls (When Enabled):</h3>
+                        <div class="key-grid-large">
+                            <div class="key-help"><kbd>←</kbd><kbd>→</kbd> Roll Left/Right</div>
+                            <div class="key-help"><kbd>↑</kbd><kbd>↓</kbd> Pitch Forward/Back</div>
+                            <div class="key-help"><kbd>A</kbd><kbd>D</kbd> Yaw Rotate</div>
+                            <div class="key-help"><kbd>W</kbd><kbd>S</kbd> Height Up/Down</div>
+                            <div class="key-help"><kbd>Space</kbd> Reset to Neutral</div>
                         </div>
-                        <div class="hand-hint-large">
-                            💡 <strong>Hold your hand flat, palm facing camera.</strong> Tilt left/right for roll, forward/back for pitch, rotate for yaw. Spot mirrors your hand movement in real-time!
+                        <div class="pose-param-large">
+                            <label>Speed:</label>
+                            <input type="range" id="pose-speed" min="0.5" max="3.0" step="0.5" value="1.0" disabled>
+                            <span id="pose-speed-val">1.0x</span>
+                        </div>
+                        <div class="pose-hint-large">
+                            💡 <strong>Zero overhead, instant response!</strong> Use arrow keys and WASD to dynamically control Spot's body pose. Robot icon above shows current orientation. Press Space to reset!
                         </div>
                     </div>
                 </div>
@@ -395,10 +412,8 @@
     <!-- Toast notification -->
     <div id="toast" class="toast"></div>
 
-    <!-- MediaPipe - FULLY BUNDLED OFFLINE -->
-    <script src="/mediapipe/camera_utils.js"></script>
-    <script src="/mediapipe/hands.js"></script>
-    <script src="/hand-control.js"></script>
+    <!-- Lightweight live pose control - zero overhead! -->
+    <script src="/live-pose-control.js"></script>
     <script src="/app.js"></script>
 </body>
 </html>

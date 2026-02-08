@@ -120,9 +120,9 @@ const elements = {
     walkHeightVal: document.getElementById('walk-height-val'),
 
     // Hand control
-    handControlToggle: document.getElementById('hand-control-toggle'),
-    handSensitivity: document.getElementById('hand-sensitivity'),
-    handSensitivityVal: document.getElementById('hand-sensitivity-val'),
+    livePoseToggle: document.getElementById('hand-control-toggle'),
+    poseSpeed: document.getElementById('hand-sensitivity'),
+    poseSpeedVal: document.getElementById('hand-sensitivity-val'),
 
     // Debug
     testConnectionBtn: document.getElementById('test-connection-btn'),
@@ -218,8 +218,8 @@ function updateConnectionUI(connected) {
         elements.resetPoseBtn.disabled = false;
 
         // Enable hand control
-        if (elements.handControlToggle) elements.handControlToggle.disabled = false;
-        if (elements.handSensitivity) elements.handSensitivity.disabled = false;
+        if (elements.livePoseToggle) elements.livePoseToggle.disabled = false;
+        if (elements.poseSpeed) elements.poseSpeed.disabled = false;
 
         // Enable gait controls
         elements.gaitPreset.disabled = false;
@@ -241,12 +241,12 @@ function updateConnectionUI(connected) {
         state.motionEnabled = false;
 
         // Disable hand control
-        if (elements.handControlToggle) {
-            elements.handControlToggle.disabled = true;
-            elements.handControlToggle.checked = false;
-            if (window.handControl) window.handControl.stop();
+        if (elements.livePoseToggle) {
+            elements.livePoseToggle.disabled = true;
+            elements.livePoseToggle.checked = false;
+            if (window.livePoseControl) window.livePoseControl.stop();
         }
-        if (elements.handSensitivity) elements.handSensitivity.disabled = false;
+        if (elements.poseSpeed) elements.poseSpeed.disabled = false;
 
         // Disable animation and body pose controls
         stopAnimation();
@@ -1389,24 +1389,24 @@ connectTelemetryWebSocket();
 connectLogsWebSocket();
 
 // Hand control integration
-if (elements.handControlToggle) {
-    elements.handControlToggle.addEventListener('change', () => {
-        if (elements.handControlToggle.checked) {
-            window.handControl.start();
+if (elements.livePoseToggle) {
+    elements.livePoseToggle.addEventListener('change', () => {
+        if (elements.livePoseToggle.checked) {
+            window.livePoseControl.start();
             showToast('🖐️ Hand tracking enabled!', 'success');
         } else {
-            window.handControl.stop();
+            window.livePoseControl.stop();
             showToast('Hand tracking disabled', 'info');
         }
     });
 }
 
-if (elements.handSensitivity) {
-    elements.handSensitivity.addEventListener('input', () => {
-        const sensitivity = parseFloat(elements.handSensitivity.value);
-        elements.handSensitivityVal.textContent = sensitivity.toFixed(1) + 'x';
-        if (window.handControl) {
-            window.handControl.setSensitivity(sensitivity);
+if (elements.poseSpeed) {
+    elements.poseSpeed.addEventListener('input', () => {
+        const sensitivity = parseFloat(elements.poseSpeed.value);
+        elements.poseSpeedVal.textContent = sensitivity.toFixed(1) + 'x';
+        if (window.livePoseControl) {
+            window.livePoseControl.setSensitivity(sensitivity);
         }
     });
 }
