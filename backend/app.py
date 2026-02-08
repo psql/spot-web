@@ -77,6 +77,9 @@ class VelocityCommand(BaseModel):
     vy: float
     yaw: float
     body_height: float = 0.0
+    body_roll: float = 0.0
+    body_pitch: float = 0.0
+    body_yaw: float = 0.0
     locomotion_hint: Optional[int] = None
 
 
@@ -270,14 +273,15 @@ async def command_stop():
 
 @app.post("/api/command/velocity")
 async def command_velocity(cmd: VelocityCommand):
-    """Send velocity command with optional gait customization."""
+    """Send velocity command with optional gait and body pose customization."""
     if not spot_bridge:
         return {"ok": False, "error": {"message": "Bridge not initialized"}}
 
     try:
         result = spot_bridge.send_velocity(
             cmd.vx, cmd.vy, cmd.yaw,
-            cmd.body_height, cmd.locomotion_hint
+            cmd.body_height, cmd.body_roll, cmd.body_pitch, cmd.body_yaw,
+            cmd.locomotion_hint
         )
         return result
     except Exception as e:

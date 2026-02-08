@@ -361,15 +361,20 @@ class SpotBridge:
             }
 
     def send_velocity(self, vx: float, vy: float, yaw: float,
-                      body_height: float = 0.0, locomotion_hint: int = None) -> Dict[str, Any]:
+                      body_height: float = 0.0, body_roll: float = 0.0,
+                      body_pitch: float = 0.0, body_yaw: float = 0.0,
+                      locomotion_hint: int = None) -> Dict[str, Any]:
         """
-        Send velocity command to robot with optional gait customization.
+        Send velocity command to robot with optional gait and body pose customization.
 
         Args:
             vx: Forward velocity in m/s
             vy: Lateral velocity in m/s
             yaw: Rotational velocity in rad/s
             body_height: Body height offset in meters (relative to nominal)
+            body_roll: Body roll angle in radians
+            body_pitch: Body pitch angle in radians
+            body_yaw: Body yaw angle in radians
             locomotion_hint: Gait hint (1=trot, 2=speed, 3=amble, 4=crawl, etc.)
 
         Returns:
@@ -379,18 +384,44 @@ class SpotBridge:
             return {"ok": False, "error": {"message": "Not connected"}}
 
         try:
+            from bosdyn.api.spot import robot_command_pb2 as spot_command_pb2
+            from bosdyn.geometry import EulerZXY
+            from bosdyn.api import geometry_pb2
+
             # Clamp to safe ranges
             vx = max(-0.5, min(0.5, vx))
             vy = max(-0.5, min(0.5, vy))
             yaw = max(-0.5, min(0.5, yaw))
             body_height = max(-0.3, min(0.3, body_height))
+            body_roll = max(-0.3, min(0.3, body_roll))
+            body_pitch = max(-0.3, min(0.3, body_pitch))
+            body_yaw = max(-0.3, min(0.3, body_yaw))
 
-            # Create velocity command with mobility params if provided
-            if locomotion_hint is not None or body_height != 0.0:
+            # Build mobility params with body control if needed
+            has_body_control = (body_height != 0.0 or body_roll != 0.0 or
+                               body_pitch != 0.0 or body_yaw != 0.0)
+
+            if has_body_control or locomotion_hint is not None:
+                # Create body orientation
+                footprint_R_body = EulerZXY(yaw=body_yaw, roll=body_roll, pitch=body_pitch)
+
+                # Create mobility params
+                mobility_params = spot_command_pb2.MobilityParams(
+                    body_control=spot_command_pb2.BodyControlParams(
+                        body_pose=spot_command_pb2.BodyControlParams.BodyPose(
+                            root_frame_name='odom',
+                            base_offset_rt_footprint=geometry_pb2.SE3Pose(
+                                position=geometry_pb2.Vec3(x=0, y=0, z=body_height),
+                                rotation=footprint_R_body.to_quaternion()
+                            )
+                        )
+                    ),
+                    locomotion_hint=locomotion_hint if locomotion_hint is not None else 1
+                )
+
                 cmd = RobotCommandBuilder.synchro_velocity_command(
                     v_x=vx, v_y=vy, v_rot=yaw,
-                    body_height=body_height,
-                    locomotion_hint=locomotion_hint if locomotion_hint is not None else 1
+                    params=mobility_params
                 )
             else:
                 cmd = RobotCommandBuilder.synchro_velocity_command(
@@ -405,7 +436,7 @@ class SpotBridge:
             # Update watchdog
             self.last_velocity_time = time.time()
 
-            logger.debug(f"Sent velocity: vx={vx:.2f}, vy={vy:.2f}, yaw={yaw:.2f}, height={body_height:.2f}, hint={locomotion_hint}")
+            logger.debug(f"Sent velocity: vx={vx:.2f}, vy={vy:.2f}, yaw={yaw:.2f}, height={body_height:.2f}, roll={body_roll:.2f}, pitch={body_pitch:.2f}")
 
             return {
                 "ok": True,
@@ -413,8 +444,7 @@ class SpotBridge:
                     "vx": vx,
                     "vy": vy,
                     "yaw": yaw,
-                    "body_height": body_height,
-                    "locomotion_hint": locomotion_hint
+                    "body_height": body_height
                 }
             }
 

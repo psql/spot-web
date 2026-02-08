@@ -802,43 +802,16 @@ function startSwaggerAnimation() {
 
     state.swaggerAnimationActive = true;
     state.swaggerStartTime = Date.now();
-    swaggerAnimationLoop();
+    showToast('🕺 Swagger mode active - walk with WASD!', 'success');
 }
 
 function stopSwaggerAnimation() {
-    state.swaggerAnimationActive = false;
-
-    // Reset pose to gait default
-    if (state.connected) {
-        api.call('/api/command/body-pose', 'POST', {
-            height: 0,
-            roll: 0,
-            pitch: 0,
-            yaw: 0
-        });
-    }
-}
-
-function swaggerAnimationLoop() {
     if (!state.swaggerAnimationActive) return;
 
-    // Calculate time since swagger started
-    const elapsed = (Date.now() - state.swaggerStartTime) / 1000;
-
-    // Calculate swagger pose (double bounce + sway)
-    const pose = calculateSwaggerPose(elapsed);
-
-    // Send pose update at 10Hz
-    const now = Date.now();
-    if (now - state.lastPoseSend >= 100) {
-        api.call('/api/command/body-pose', 'POST', pose).catch(err => {
-            console.error('Swagger pose update failed:', err);
-        });
-        state.lastPoseSend = now;
-    }
-
-    // Continue loop
-    requestAnimationFrame(swaggerAnimationLoop);
+    state.swaggerAnimationActive = false;
+    state.walkHeight = 0.0;
+    elements.walkHeight.value = 0.0;
+    elements.walkHeightVal.textContent = '0.00m';
 }
 
 // Keyboard handling
@@ -867,19 +840,42 @@ function updateVelocityDisplay() {
 }
 
 async function sendVelocityIfChanged(newVel) {
-    // Check if velocity changed
+    // Check if velocity changed or if swagger is active (needs continuous updates)
     const changed =
         Math.abs(newVel.vx - state.currentVelocity.vx) > 0.01 ||
         Math.abs(newVel.vy - state.currentVelocity.vy) > 0.01 ||
         Math.abs(newVel.yaw - state.currentVelocity.yaw) > 0.01;
 
-    if (changed || (Date.now() - state.lastVelocitySend > 100 && (newVel.vx !== 0 || newVel.vy !== 0 || newVel.yaw !== 0))) {
-        // Send with gait params
+    const needsUpdate = changed || state.swaggerAnimationActive ||
+        (Date.now() - state.lastVelocitySend > 100 && (newVel.vx !== 0 || newVel.vy !== 0 || newVel.yaw !== 0));
+
+    if (needsUpdate) {
+        // Calculate dynamic body pose if swagger is active
+        let bodyHeight = state.walkHeight;
+        let bodyRoll = 0.0;
+        let bodyPitch = 0.0;
+        let bodyYaw = 0.0;
+
+        if (state.swaggerAnimationActive) {
+            const elapsed = (Date.now() - state.swaggerStartTime) / 1000;
+            const swaggerPose = calculateSwaggerPose(elapsed);
+
+            // Combine base walk height with swagger pose
+            bodyHeight = state.walkHeight + swaggerPose.height;
+            bodyRoll = swaggerPose.roll;
+            bodyPitch = swaggerPose.pitch;
+            bodyYaw = swaggerPose.yaw;
+        }
+
+        // Send with full gait and body pose params
         await api.call('/api/command/velocity', 'POST', {
             vx: newVel.vx,
             vy: newVel.vy,
             yaw: newVel.yaw,
-            body_height: state.walkHeight,
+            body_height: bodyHeight,
+            body_roll: bodyRoll,
+            body_pitch: bodyPitch,
+            body_yaw: bodyYaw,
             locomotion_hint: state.locomotionHint
         });
 
