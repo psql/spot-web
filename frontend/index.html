@@ -395,16 +395,10 @@
     <!-- Toast notification -->
     <div id="toast" class="toast"></div>
 
-    <!-- Hand control disabled until we can bundle models properly -->
-    <!-- <script src="/hand-control-tf.js"></script> -->
-    <script>
-        // Temp: disable hand control until offline models ready
-        window.handControl = {
-            start: () => alert('Hand control coming soon - needs offline model bundling'),
-            stop: () => {},
-            setSensitivity: () => {}
-        };
-    </script>
+    <!-- MediaPipe - FULLY BUNDLED OFFLINE -->
+    <script src="/mediapipe/camera_utils.js"></script>
+    <script src="/mediapipe/hands.js"></script>
+    <script src="/hand-control.js"></script>
     <script src="/app.js"></script>
 </body>
 </html>
