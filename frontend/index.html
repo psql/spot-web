@@ -169,38 +169,12 @@
                             </div>
                         </div>
 
-                        <!-- Rotational Motion -->
-                        <div class="swagger-section">
-                            <label class="section-label">🔄 Rotational Motion (Twist)</label>
-                            <div class="oscillator-param">
-                                <label>Body Twist:</label>
-                                <input type="range" id="twist-amplitude" min="0.0" max="0.15" step="0.01" value="0.05">
-                                <span id="twist-amplitude-val">5cm</span>
-                            </div>
-                            <div class="oscillator-param">
-                                <label>Twist Speed:</label>
-                                <input type="range" id="twist-frequency" min="0.5" max="4.0" step="0.25" value="2.0">
-                                <span id="twist-frequency-val">2.0 Hz</span>
-                            </div>
-                            <div class="oscillator-param">
-                                <label>Twist Phase:</label>
-                                <input type="range" id="twist-phase" min="0" max="6.28" step="0.1" value="1.57">
-                                <span id="twist-phase-val">90°</span>
-                            </div>
-                        </div>
-
-                        <!-- Forward/Back Motion -->
-                        <div class="swagger-section">
-                            <label class="section-label">↕️ Pitch (Forward Lean)</label>
-                            <div class="oscillator-param">
-                                <label>Pitch:</label>
-                                <input type="range" id="pitch-amplitude" min="0.0" max="0.10" step="0.01" value="0.05">
-                                <span id="pitch-amplitude-val">5cm</span>
-                            </div>
-                            <div class="oscillator-param">
-                                <label>Pitch Phase:</label>
-                                <input type="range" id="pitch-phase" min="0" max="6.28" step="0.1" value="0">
-                                <span id="pitch-phase-val">0°</span>
+                        <!-- Note about SDK limitations -->
+                        <div class="swagger-section sdk-note">
+                            <label class="section-label">ℹ️ SDK Note</label>
+                            <div class="swagger-hint">
+                                <strong>During walking:</strong> Only bounce (height) is supported by Spot SDK.<br>
+                                <strong>While standing:</strong> Use Animation Mode for full twist/sway/pitch control!
                             </div>
                         </div>
 

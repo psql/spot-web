@@ -834,23 +834,26 @@ const animations = {
             const intensity = parseFloat(elements.tailwagIntensity.value);
             const speed = parseFloat(elements.tailwagSpeed.value);
 
-            // Play bow pose: head down, butt up
-            const bowPitch = -0.25; // Head down significantly
-            const bowHeight = -0.1; // Lower front, keep back up
+            // Play bow pose: HEAD DOWN (front low), BUTT UP (back high)
+            // Positive pitch rotates nose UP - so use POSITIVE for butt up!
+            const bowPitch = 0.30 * intensity; // Butt up, head down
 
-            // Hip wiggle - fast yaw oscillation
-            const wiggle = Math.sin(t * speed * 2 * Math.PI) * 0.20 * intensity;
+            // Raise body slightly so back end goes higher
+            const bowHeight = 0.05;
+
+            // Hip wiggle - fast yaw oscillation (tail wag)
+            const wiggle = Math.sin(t * speed * 2 * Math.PI) * 0.25 * intensity;
 
             // Side-to-side weight shift during wag
-            const wiggleRoll = Math.sin(t * speed * 2 * Math.PI + Math.PI/2) * 0.10 * intensity;
+            const wiggleRoll = Math.sin(t * speed * 2 * Math.PI + Math.PI/2) * 0.12 * intensity;
 
-            // Slight bounce in the bow
-            const excitedBounce = Math.sin(t * speed * 2 * Math.PI) * 0.05 * intensity;
+            // Slight excited bounce in the bow
+            const excitedBounce = Math.sin(t * speed * 2 * Math.PI) * 0.06 * intensity;
 
             return {
                 height: bowHeight + excitedBounce,
                 roll: wiggleRoll,
-                pitch: bowPitch,
+                pitch: bowPitch,  // Positive = butt up, head down
                 yaw: wiggle
             };
         }

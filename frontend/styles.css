@@ -386,6 +386,23 @@ header h1 {
     border-left: 3px solid #00ff88;
 }
 
+.sdk-note {
+    background: rgba(255, 170, 0, 0.1);
+    border-left-color: #ffaa00;
+}
+
+.sdk-note .swagger-hint {
+    background: transparent;
+    border: none;
+    margin: 0;
+    padding: 0;
+    color: #ffaa00;
+}
+
+.sdk-note .swagger-hint strong {
+    color: #ffd700;
+}
+
 .oscillator-param {
     display: flex;
     align-items: center;
