@@ -55,7 +55,7 @@ class HandControl {
 
             this.hands.setOptions({
                 maxNumHands: 1,
-                modelComplexity: 1,
+                modelComplexity: 0,  // 0 = lite model (MUCH faster!)
                 minDetectionConfidence: 0.5,
                 minTrackingConfidence: 0.5
             });
@@ -64,22 +64,27 @@ class HandControl {
 
             // Start camera
             console.log('Starting camera...');
+            // Lower res + frame skipping for smooth 60fps
+            let frameCount = 0;
             this.camera = new Camera(this.video, {
                 onFrame: async () => {
-                    if (this.hands) {
-                        await this.hands.send({ image: this.video });
+                    if (this.hands && this.active) {
+                        // Process every 2nd frame only (2x speed boost)
+                        if (frameCount++ % 2 === 0) {
+                            await this.hands.send({ image: this.video });
+                        }
                     }
                 },
-                width: 640,
-                height: 480
+                width: 480,
+                height: 360
             });
 
             await this.camera.start();
             console.log('✅ Camera started!');
 
-            // Set canvas size
-            this.canvas.width = 640;
-            this.canvas.height = 480;
+            // Set canvas size to match video
+            this.canvas.width = 480;
+            this.canvas.height = 360;
 
             return true;
         } catch (error) {
