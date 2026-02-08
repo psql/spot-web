@@ -365,17 +365,17 @@ class SpotBridge:
                       body_pitch: float = 0.0, body_yaw: float = 0.0,
                       locomotion_hint: int = None) -> Dict[str, Any]:
         """
-        Send velocity command to robot with optional gait and body pose customization.
+        Send velocity command to robot with optional gait customization.
 
         Args:
             vx: Forward velocity in m/s
             vy: Lateral velocity in m/s
             yaw: Rotational velocity in rad/s
             body_height: Body height offset in meters (relative to nominal)
-            body_roll: Body roll angle in radians
-            body_pitch: Body pitch angle in radians
-            body_yaw: Body yaw angle in radians
-            locomotion_hint: Gait hint (1=trot, 2=speed, 3=amble, 4=crawl, etc.)
+            body_roll: Body roll (ignored - SDK limitation)
+            body_pitch: Body pitch (ignored - SDK limitation)
+            body_yaw: Body yaw (ignored - SDK limitation)
+            locomotion_hint: Gait hint (1=trot, 4=crawl, etc.)
 
         Returns:
             Result dictionary
@@ -384,45 +384,26 @@ class SpotBridge:
             return {"ok": False, "error": {"message": "Not connected"}}
 
         try:
-            from bosdyn.api.spot import robot_command_pb2 as spot_command_pb2
-            from bosdyn.geometry import EulerZXY
-            from bosdyn.api import geometry_pb2, trajectory_pb2
-
             # Clamp to safe ranges
             vx = max(-0.5, min(0.5, vx))
             vy = max(-0.5, min(0.5, vy))
             yaw = max(-0.5, min(0.5, yaw))
             body_height = max(-0.3, min(0.3, body_height))
-            body_roll = max(-0.3, min(0.3, body_roll))
-            body_pitch = max(-0.3, min(0.3, body_pitch))
-            body_yaw = max(-0.3, min(0.3, body_yaw))
 
-            # Use body_height directly for now (SDK supports this)
-            # Full body control (roll/pitch/yaw) during velocity may require different approach
-            if body_height != 0.0:
-                logger.debug(f"Using body_height: {body_height:.3f}")
+            # Build command - use body_height and locomotion_hint if provided
+            if locomotion_hint is not None or body_height != 0.0:
+                logger.debug(f"Velocity with params: height={body_height:.3f}, hint={locomotion_hint}")
                 cmd = RobotCommandBuilder.synchro_velocity_command(
                     v_x=vx, v_y=vy, v_rot=yaw,
                     body_height=body_height,
                     locomotion_hint=locomotion_hint if locomotion_hint is not None else 1
                 )
-            elif locomotion_hint is not None:
-                cmd = RobotCommandBuilder.synchro_velocity_command(
-                    v_x=vx, v_y=vy, v_rot=yaw,
-                    locomotion_hint=locomotion_hint
-                )
             else:
+                logger.debug(f"Velocity without params")
                 cmd = RobotCommandBuilder.synchro_velocity_command(
                     v_x=vx, v_y=vy, v_rot=yaw,
                     params=None
                 )
-
-            # If we have roll/pitch/yaw during walking, send separate body adjustment
-            # (This is a workaround - Spot may not support full 6DOF control during velocity)
-            if (body_roll != 0.0 or body_pitch != 0.0 or body_yaw != 0.0) and (vx != 0 or vy != 0 or yaw != 0):
-                logger.debug(f"Walking with body orientation: roll={body_roll:.3f}, pitch={body_pitch:.3f}, yaw={body_yaw:.3f}")
-                # For now, log this - full body control during velocity needs more research
-                # The SDK may not support roll/pitch/yaw during active locomotion
 
             # Send with end time
             end_time = time.time() + 0.25
@@ -431,7 +412,7 @@ class SpotBridge:
             # Update watchdog
             self.last_velocity_time = time.time()
 
-            logger.debug(f"Sent velocity: vx={vx:.2f}, vy={vy:.2f}, yaw={yaw:.2f}, height={body_height:.2f}, roll={body_roll:.2f}, pitch={body_pitch:.2f}")
+            logger.debug(f"Sent velocity: vx={vx:.2f}, vy={vy:.2f}, yaw={yaw:.2f}, height={body_height:.2f}")
 
             return {
                 "ok": True,
@@ -451,6 +432,16 @@ class SpotBridge:
                     "error_type": e.__class__.__name__,
                     "message": str(e),
                     "suggested_fix": self._suggest_fix_for_error(e)
+                }
+            }
+        except Exception as e:
+            logger.error(f"Unexpected error in send_velocity: {e}", exc_info=True)
+            return {
+                "ok": False,
+                "error": {
+                    "error_type": e.__class__.__name__,
+                    "message": str(e),
+                    "suggested_fix": "Check logs for details"
                 }
             }
 
