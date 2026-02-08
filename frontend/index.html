@@ -395,10 +395,16 @@
     <!-- Toast notification -->
     <div id="toast" class="toast"></div>
 
-    <!-- TensorFlow.js Handpose - Simpler and more reliable -->
-    <script src="/tf-handpose.js"></script>
-    <script src="/handpose-model.js"></script>
-    <script src="/hand-control-tf.js"></script>
+    <!-- Hand control disabled until we can bundle models properly -->
+    <!-- <script src="/hand-control-tf.js"></script> -->
+    <script>
+        // Temp: disable hand control until offline models ready
+        window.handControl = {
+            start: () => alert('Hand control coming soon - needs offline model bundling'),
+            stop: () => {},
+            setSensitivity: () => {}
+        };
+    </script>
     <script src="/app.js"></script>
 </body>
 </html>
