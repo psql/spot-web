@@ -462,9 +462,11 @@ async function handleStop() {
 // Motion control
 function handleMotionToggle() {
     state.motionEnabled = elements.motionToggle.checked;
+    console.log('Motion toggle:', state.motionEnabled);
 
     if (state.motionEnabled) {
         showToast('Keyboard control enabled - Use WASD/QE', 'info');
+        console.log('Starting motion loop...');
         startMotionLoop();
 
         // Start swagger animation if swagger gait is selected
@@ -1168,13 +1170,18 @@ async function sendVelocityIfChanged(newVel) {
 }
 
 function motionLoop() {
-    if (!state.motionEnabled) return;
+    if (!state.motionEnabled) {
+        console.log('Motion loop stopped - motion disabled');
+        return;
+    }
 
     const newVel = calculateVelocityFromKeys();
+    console.log('Calculated velocity:', newVel, 'Pressed keys:', Array.from(state.pressedKeys));
 
     // Always send velocity when motion enabled, even if zero
     // This ensures swagger animation continues to update
     if (state.swaggerAnimationActive || newVel.vx !== 0 || newVel.vy !== 0 || newVel.yaw !== 0) {
+        console.log('Sending velocity...');
         sendVelocityIfChanged(newVel);
     }
 
@@ -1186,6 +1193,7 @@ function startMotionLoop() {
 }
 
 function handleKeyDown(event) {
+    console.log('Key pressed:', event.key, 'Motion enabled:', state.motionEnabled);
     if (!state.motionEnabled) return;
 
     // Ignore if typing in input fields
@@ -1197,6 +1205,7 @@ function handleKeyDown(event) {
     if (['w', 'a', 's', 'd', 'q', 'e'].includes(key)) {
         event.preventDefault();
         state.pressedKeys.add(key);
+        console.log('Added key to pressedKeys:', key, 'Total:', state.pressedKeys.size);
     }
 
     // Space bar as emergency stop
@@ -1345,21 +1354,15 @@ elements.animationPlayBtn.addEventListener('click', startAnimation);
 elements.animationStopBtn.addEventListener('click', stopAnimation);
 elements.globalAmplitude.addEventListener('input', handleGlobalAmplitudeChange);
 elements.animationSpeed.addEventListener('input', handleAnimationSpeedChange);
-elements.bounceAmplitude.addEventListener('input', handleBounceAmplitudeChange);
-elements.bounceFrequency.addEventListener('input', handleBounceFrequencyChange);
-elements.bobDelay.addEventListener('input', handleBobDelayChange);
-elements.swayAmplitude.addEventListener('input', handleSwayAmplitudeChange);
-elements.swayFrequency.addEventListener('input', handleSwayFrequencyChange);
-elements.swaggerPhase.addEventListener('input', handleSwaggerPhaseChange);
-elements.twistAmplitude.addEventListener('input', handleTwistAmplitudeChange);
-elements.twistFrequency.addEventListener('input', handleTwistFrequencyChange);
-elements.twistPhase.addEventListener('input', handleTwistPhaseChange);
-elements.pitchAmplitude.addEventListener('input', handlePitchAmplitudeChange);
-elements.pitchPhase.addEventListener('input', handlePitchPhaseChange);
-elements.swaggerSpeedMult.addEventListener('input', handleSwaggerSpeedMultChange);
-elements.swaggerDamping.addEventListener('input', handleSwaggerDampingChange);
-elements.tailwagIntensity.addEventListener('input', handleTailwagIntensityChange);
-elements.tailwagSpeed.addEventListener('input', handleTailwagSpeedChange);
+// Only add listeners for elements that actually exist
+if (elements.bounceAmplitude) elements.bounceAmplitude.addEventListener('input', handleBounceAmplitudeChange);
+if (elements.bounceFrequency) elements.bounceFrequency.addEventListener('input', handleBounceFrequencyChange);
+if (elements.bobDelay) elements.bobDelay.addEventListener('input', handleBobDelayChange);
+if (elements.swayAmplitude) elements.swayAmplitude.addEventListener('input', handleSwayAmplitudeChange);
+if (elements.swayFrequency) elements.swayFrequency.addEventListener('input', handleSwayFrequencyChange);
+if (elements.swaggerPhase) elements.swaggerPhase.addEventListener('input', handleSwaggerPhaseChange);
+if (elements.tailwagIntensity) elements.tailwagIntensity.addEventListener('input', handleTailwagIntensityChange);
+if (elements.tailwagSpeed) elements.tailwagSpeed.addEventListener('input', handleTailwagSpeedChange);
 elements.oscFreq.addEventListener('input', handleOscFreqChange);
 
 // Swagger preset buttons
