@@ -405,16 +405,22 @@ class SpotBridge:
                 # Create body orientation
                 footprint_R_body = EulerZXY(yaw=body_yaw, roll=body_roll, pitch=body_pitch)
 
-                # Create mobility params
-                mobility_params = spot_command_pb2.MobilityParams(
-                    body_control=spot_command_pb2.BodyControlParams(
-                        body_pose=spot_command_pb2.BodyControlParams.BodyPose(
-                            root_frame_name='odom',
-                            base_offset_rt_footprint=geometry_pb2.SE3Pose(
+                # Create SE3Trajectory for body offset
+                body_traj = geometry_pb2.SE3Trajectory(
+                    points=[
+                        geometry_pb2.SE3TrajectoryPoint(
+                            pose=geometry_pb2.SE3Pose(
                                 position=geometry_pb2.Vec3(x=0, y=0, z=body_height),
                                 rotation=footprint_R_body.to_quaternion()
                             )
                         )
+                    ]
+                )
+
+                # Create mobility params with base_offset_rt_footprint
+                mobility_params = spot_command_pb2.MobilityParams(
+                    body_control=spot_command_pb2.BodyControlParams(
+                        base_offset_rt_footprint=body_traj
                     ),
                     locomotion_hint=locomotion_hint if locomotion_hint is not None else 1
                 )
