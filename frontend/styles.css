@@ -316,23 +316,74 @@ header h1 {
 
 #swagger-controls {
     margin-top: 15px;
-    padding: 15px;
-    background: rgba(0, 255, 136, 0.1);
-    border-radius: 6px;
-    border-left: 3px solid #00ff88;
+    padding: 20px;
+    background: rgba(0, 255, 136, 0.08);
+    border-radius: 8px;
+    border: 2px solid rgba(0, 255, 136, 0.3);
 }
 
 #swagger-controls h4 {
-    font-size: 0.9rem;
-    margin-bottom: 10px;
+    font-size: 1.05rem;
+    margin-bottom: 15px;
     color: #00ff88;
+    font-weight: 700;
+}
+
+.swagger-section {
+    margin-bottom: 20px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+}
+
+.section-label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #00d9ff;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.swagger-presets {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.preset-btn {
+    padding: 8px 16px;
+    background: rgba(0, 217, 255, 0.2);
+    border: 1px solid rgba(0, 217, 255, 0.4);
+    border-radius: 4px;
+    color: #00d9ff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.preset-btn:hover {
+    background: rgba(0, 217, 255, 0.3);
+    border-color: #00d9ff;
+    transform: translateY(-1px);
+}
+
+.preset-btn:active {
+    transform: translateY(0);
 }
 
 .swagger-hint {
-    margin-top: 10px;
+    margin-top: 15px;
+    padding: 10px;
     font-size: 0.85rem;
     color: #a0a0a0;
     font-style: italic;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    border-left: 3px solid #00ff88;
 }
 
 .oscillator-param {

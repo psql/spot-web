@@ -114,16 +114,61 @@
                         </div>
                     </div>
 
-                    <!-- Swagger Gait Controls -->
+                    <!-- Swagger Gait Controls - Richard Williams Style Animation Control -->
                     <div id="swagger-controls" style="display:none;">
-                        <h4>Swagger Intensity</h4>
-                        <div class="oscillator-param">
-                            <label>Swagger Amp:</label>
-                            <input type="range" id="swagger-amplitude" min="0.0" max="1.5" step="0.1" value="1.0">
-                            <span id="swagger-amplitude-val">1.0x</span>
+                        <h4>🎬 Swagger Animation Controls</h4>
+
+                        <div class="swagger-section">
+                            <label class="section-label">Bounce (Vertical)</label>
+                            <div class="oscillator-param">
+                                <label>Amplitude:</label>
+                                <input type="range" id="bounce-amplitude" min="0.0" max="0.15" step="0.01" value="0.08">
+                                <span id="bounce-amplitude-val">8cm</span>
+                            </div>
+                            <div class="oscillator-param">
+                                <label>Frequency:</label>
+                                <input type="range" id="bounce-frequency" min="0.5" max="5.0" step="0.5" value="3.0">
+                                <span id="bounce-frequency-val">3.0 Hz</span>
+                            </div>
                         </div>
+
+                        <div class="swagger-section">
+                            <label class="section-label">Sway (Side-to-Side)</label>
+                            <div class="oscillator-param">
+                                <label>Amplitude:</label>
+                                <input type="range" id="sway-amplitude" min="0.0" max="0.20" step="0.01" value="0.12">
+                                <span id="sway-amplitude-val">12cm</span>
+                            </div>
+                            <div class="oscillator-param">
+                                <label>Frequency:</label>
+                                <input type="range" id="sway-frequency" min="0.5" max="4.0" step="0.5" value="1.5">
+                                <span id="sway-frequency-val">1.5 Hz</span>
+                            </div>
+                        </div>
+
+                        <div class="swagger-section">
+                            <label class="section-label">Timing & Personality</label>
+                            <div class="oscillator-param">
+                                <label>Phase Offset:</label>
+                                <input type="range" id="swagger-phase" min="0" max="6.28" step="0.1" value="0">
+                                <span id="swagger-phase-val">0°</span>
+                            </div>
+                            <div class="oscillator-param">
+                                <label>Pitch Amt:</label>
+                                <input type="range" id="pitch-amplitude" min="0.0" max="0.10" step="0.01" value="0.05">
+                                <span id="pitch-amplitude-val">5cm</span>
+                            </div>
+                        </div>
+
+                        <div class="swagger-presets">
+                            <button class="preset-btn" data-preset="subtle">Subtle</button>
+                            <button class="preset-btn" data-preset="confident">Confident</button>
+                            <button class="preset-btn" data-preset="dramatic">Dramatic</button>
+                            <button class="preset-btn" data-preset="bouncy">Bouncy</button>
+                        </div>
+
                         <div class="swagger-hint">
-                            💡 Adjust while walking to dial in the perfect strut!
+                            💡 Inspired by Richard Williams - dial in the perfect walk personality!
                         </div>
                     </div>
 
