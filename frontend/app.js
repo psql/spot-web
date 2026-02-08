@@ -36,6 +36,17 @@ const elements = {
     sitBtn: document.getElementById('sit-btn'),
     stopBtn: document.getElementById('stop-btn'),
 
+    // Body pose control
+    heightSlider: document.getElementById('height-slider'),
+    heightValue: document.getElementById('height-value'),
+    rollSlider: document.getElementById('roll-slider'),
+    rollValue: document.getElementById('roll-value'),
+    pitchSlider: document.getElementById('pitch-slider'),
+    pitchValue: document.getElementById('pitch-value'),
+    yawSlider: document.getElementById('yaw-slider'),
+    yawValue: document.getElementById('yaw-value'),
+    resetPoseBtn: document.getElementById('reset-pose-btn'),
+
     // Motion control
     motionToggle: document.getElementById('motion-enable-toggle'),
     speedSlider: document.getElementById('speed-slider'),
@@ -125,6 +136,13 @@ function updateConnectionUI(connected) {
         elements.sitBtn.disabled = false;
         elements.stopBtn.disabled = false;
         elements.motionToggle.disabled = false;
+
+        // Enable body pose controls
+        elements.heightSlider.disabled = false;
+        elements.rollSlider.disabled = false;
+        elements.pitchSlider.disabled = false;
+        elements.yawSlider.disabled = false;
+        elements.resetPoseBtn.disabled = false;
     } else {
         elements.connectionBadge.textContent = 'Not Connected';
         elements.connectionBadge.className = 'status-badge disconnected';
@@ -140,6 +158,13 @@ function updateConnectionUI(connected) {
         elements.motionToggle.disabled = true;
         elements.motionToggle.checked = false;
         state.motionEnabled = false;
+
+        // Disable body pose controls
+        elements.heightSlider.disabled = true;
+        elements.rollSlider.disabled = true;
+        elements.pitchSlider.disabled = true;
+        elements.yawSlider.disabled = true;
+        elements.resetPoseBtn.disabled = true;
 
         // Reset status
         elements.robotId.textContent = '-';
@@ -347,6 +372,71 @@ function handleMotionToggle() {
 function handleSpeedSlider() {
     state.speedScale = parseFloat(elements.speedSlider.value);
     elements.speedValue.textContent = state.speedScale.toFixed(1);
+}
+
+// Body pose control handlers
+let poseUpdateTimeout = null;
+
+function handleHeightSlider() {
+    const height = parseFloat(elements.heightSlider.value);
+    elements.heightValue.textContent = height.toFixed(2) + 'm';
+    debouncedPoseUpdate();
+}
+
+function handleRollSlider() {
+    const roll = parseFloat(elements.rollSlider.value);
+    elements.rollValue.textContent = (roll * 180 / Math.PI).toFixed(1) + '°';
+    debouncedPoseUpdate();
+}
+
+function handlePitchSlider() {
+    const pitch = parseFloat(elements.pitchSlider.value);
+    elements.pitchValue.textContent = (pitch * 180 / Math.PI).toFixed(1) + '°';
+    debouncedPoseUpdate();
+}
+
+function handleYawSlider() {
+    const yaw = parseFloat(elements.yawSlider.value);
+    elements.yawValue.textContent = (yaw * 180 / Math.PI).toFixed(1) + '°';
+    debouncedPoseUpdate();
+}
+
+function debouncedPoseUpdate() {
+    clearTimeout(poseUpdateTimeout);
+    poseUpdateTimeout = setTimeout(updateBodyPose, 100);
+}
+
+async function updateBodyPose() {
+    const height = parseFloat(elements.heightSlider.value);
+    const roll = parseFloat(elements.rollSlider.value);
+    const pitch = parseFloat(elements.pitchSlider.value);
+    const yaw = parseFloat(elements.yawSlider.value);
+
+    const result = await api.call('/api/command/body-pose', 'POST', {
+        height,
+        roll,
+        pitch,
+        yaw
+    });
+
+    if (!result.ok) {
+        showToast('Body pose update failed', 'error');
+    }
+}
+
+async function handleResetPose() {
+    elements.heightSlider.value = 0;
+    elements.rollSlider.value = 0;
+    elements.pitchSlider.value = 0;
+    elements.yawSlider.value = 0;
+
+    elements.heightValue.textContent = '0.00m';
+    elements.rollValue.textContent = '0.0°';
+    elements.pitchValue.textContent = '0.0°';
+    elements.yawValue.textContent = '0.0°';
+
+    await updateBodyPose();
+    showToast('Body pose reset', 'info');
 }
 
 // Keyboard handling
@@ -557,6 +647,11 @@ elements.powerOffBtn.addEventListener('click', handlePowerOff);
 elements.standBtn.addEventListener('click', handleStand);
 elements.sitBtn.addEventListener('click', handleSit);
 elements.stopBtn.addEventListener('click', handleStop);
+elements.heightSlider.addEventListener('input', handleHeightSlider);
+elements.rollSlider.addEventListener('input', handleRollSlider);
+elements.pitchSlider.addEventListener('input', handlePitchSlider);
+elements.yawSlider.addEventListener('input', handleYawSlider);
+elements.resetPoseBtn.addEventListener('click', handleResetPose);
 elements.motionToggle.addEventListener('change', handleMotionToggle);
 elements.speedSlider.addEventListener('input', handleSpeedSlider);
 elements.testConnectionBtn.addEventListener('click', handleTestConnection);

@@ -229,6 +229,62 @@ header h1 {
     flex-wrap: wrap;
 }
 
+/* Body pose panel */
+.body-pose-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.pose-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pose-control label {
+    min-width: 60px;
+    font-weight: 600;
+}
+
+.pose-control input[type="range"] {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: #555;
+    outline: none;
+}
+
+.pose-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #00ff88;
+    cursor: pointer;
+}
+
+.pose-control input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #00ff88;
+    cursor: pointer;
+    border: none;
+}
+
+.pose-control span {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    min-width: 70px;
+    text-align: right;
+}
+
+.pose-buttons {
+    margin-top: 10px;
+}
+
 /* Motion panel */
 .motion-controls {
     display: flex;

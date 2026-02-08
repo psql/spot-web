@@ -437,6 +437,78 @@ class SpotBridge:
                 }
             }
 
+    def set_body_pose(self, height: float, roll: float = 0.0, pitch: float = 0.0, yaw: float = 0.0) -> Dict[str, Any]:
+        """
+        Set Spot's body pose (height and orientation) while maintaining balance.
+
+        Args:
+            height: Body height in meters (0.0 = default, -0.2 to +0.2 recommended)
+            roll: Roll angle in radians
+            pitch: Pitch angle in radians
+            yaw: Yaw angle in radians
+
+        Returns:
+            Result dictionary
+        """
+        if not self.connected:
+            return {"ok": False, "error": {"message": "Not connected"}}
+
+        try:
+            # Import geometry for body positioning
+            from bosdyn.geometry import EulerZXY
+            import math
+
+            # Clamp values to safe ranges
+            height = max(-0.3, min(0.3, height))
+            roll = max(-0.3, min(0.3, roll))
+            pitch = max(-0.3, min(0.3, pitch))
+            yaw = max(-0.3, min(0.3, yaw))
+
+            # Create body control parameters
+            footprint_R_body = EulerZXY(yaw=yaw, roll=roll, pitch=pitch)
+
+            # Build stand command with body pose
+            cmd = RobotCommandBuilder.synchro_stand_command(
+                body_height=height,
+                footprint_R_body=footprint_R_body
+            )
+
+            # Send command
+            self.command_client.robot_command(cmd, end_time_secs=time.time() + 2.0)
+
+            logger.debug(f"Set body pose: height={height:.2f}m, roll={roll:.2f}, pitch={pitch:.2f}, yaw={yaw:.2f}")
+
+            return {
+                "ok": True,
+                "data": {
+                    "height": height,
+                    "roll": roll,
+                    "pitch": pitch,
+                    "yaw": yaw
+                }
+            }
+
+        except RpcError as e:
+            logger.error(f"Error setting body pose: {e}")
+            return {
+                "ok": False,
+                "error": {
+                    "error_type": e.__class__.__name__,
+                    "message": str(e),
+                    "suggested_fix": self._suggest_fix_for_error(e)
+                }
+            }
+        except Exception as e:
+            logger.error(f"Unexpected error setting body pose: {e}", exc_info=True)
+            return {
+                "ok": False,
+                "error": {
+                    "error_type": e.__class__.__name__,
+                    "message": str(e),
+                    "suggested_fix": "Check that robot is standing and powered on"
+                }
+            }
+
     def estop_stop(self) -> Dict[str, Any]:
         """Trigger software E-Stop."""
         if not self.connected or not self.estop_endpoint:

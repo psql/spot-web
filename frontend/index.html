@@ -78,6 +78,36 @@
                 </div>
             </section>
 
+            <!-- Body Pose Control Panel -->
+            <section class="panel body-pose-panel">
+                <h2>Body Pose Control</h2>
+                <div class="body-pose-controls">
+                    <div class="pose-control">
+                        <label for="height-slider">Height:</label>
+                        <input type="range" id="height-slider" min="-0.3" max="0.3" step="0.01" value="0" disabled>
+                        <span id="height-value">0.00m</span>
+                    </div>
+                    <div class="pose-control">
+                        <label for="roll-slider">Roll:</label>
+                        <input type="range" id="roll-slider" min="-0.3" max="0.3" step="0.01" value="0" disabled>
+                        <span id="roll-value">0.00°</span>
+                    </div>
+                    <div class="pose-control">
+                        <label for="pitch-slider">Pitch:</label>
+                        <input type="range" id="pitch-slider" min="-0.3" max="0.3" step="0.01" value="0" disabled>
+                        <span id="pitch-value">0.00°</span>
+                    </div>
+                    <div class="pose-control">
+                        <label for="yaw-slider">Yaw:</label>
+                        <input type="range" id="yaw-slider" min="-0.3" max="0.3" step="0.01" value="0" disabled>
+                        <span id="yaw-value">0.00°</span>
+                    </div>
+                    <div class="pose-buttons">
+                        <button id="reset-pose-btn" class="btn btn-secondary" disabled>Reset to Default</button>
+                    </div>
+                </div>
+            </section>
+
             <!-- Motion Control Panel -->
             <section class="panel motion-panel">
                 <h2>Motion Control</h2>

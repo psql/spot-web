@@ -287,6 +287,34 @@ async def command_velocity(cmd: VelocityCommand):
         }
 
 
+class BodyPoseCommand(BaseModel):
+    height: float
+    roll: float = 0.0
+    pitch: float = 0.0
+    yaw: float = 0.0
+
+
+@app.post("/api/command/body-pose")
+async def command_body_pose(cmd: BodyPoseCommand):
+    """Set body pose (height and orientation)."""
+    if not spot_bridge:
+        return {"ok": False, "error": {"message": "Bridge not initialized"}}
+
+    try:
+        result = spot_bridge.set_body_pose(cmd.height, cmd.roll, cmd.pitch, cmd.yaw)
+        return result
+    except Exception as e:
+        logger.error(f"Error in body_pose endpoint: {e}", exc_info=True)
+        return {
+            "ok": False,
+            "error": {
+                "error_type": e.__class__.__name__,
+                "message": str(e),
+                "suggested_fix": "Check logs for details"
+            }
+        }
+
+
 # E-Stop endpoints
 @app.post("/api/estop/stop")
 async def estop_stop():
