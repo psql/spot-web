@@ -52,18 +52,37 @@ const elements = {
     animationStatus: document.getElementById('animation-status'),
     oscillatorControls: document.getElementById('oscillator-controls'),
     swaggerControls: document.getElementById('swagger-controls'),
+    // Bounce controls
     bounceAmplitude: document.getElementById('bounce-amplitude'),
     bounceAmplitudeVal: document.getElementById('bounce-amplitude-val'),
     bounceFrequency: document.getElementById('bounce-frequency'),
     bounceFrequencyVal: document.getElementById('bounce-frequency-val'),
+    bobDelay: document.getElementById('bob-delay'),
+    bobDelayVal: document.getElementById('bob-delay-val'),
+    // Sway controls
     swayAmplitude: document.getElementById('sway-amplitude'),
     swayAmplitudeVal: document.getElementById('sway-amplitude-val'),
     swayFrequency: document.getElementById('sway-frequency'),
     swayFrequencyVal: document.getElementById('sway-frequency-val'),
     swaggerPhase: document.getElementById('swagger-phase'),
     swaggerPhaseVal: document.getElementById('swagger-phase-val'),
+    // Twist controls
+    twistAmplitude: document.getElementById('twist-amplitude'),
+    twistAmplitudeVal: document.getElementById('twist-amplitude-val'),
+    twistFrequency: document.getElementById('twist-frequency'),
+    twistFrequencyVal: document.getElementById('twist-frequency-val'),
+    twistPhase: document.getElementById('twist-phase'),
+    twistPhaseVal: document.getElementById('twist-phase-val'),
+    // Pitch controls
     pitchAmplitude: document.getElementById('pitch-amplitude'),
     pitchAmplitudeVal: document.getElementById('pitch-amplitude-val'),
+    pitchPhase: document.getElementById('pitch-phase'),
+    pitchPhaseVal: document.getElementById('pitch-phase-val'),
+    // Advanced
+    swaggerSpeedMult: document.getElementById('swagger-speed-mult'),
+    swaggerSpeedMultVal: document.getElementById('swagger-speed-mult-val'),
+    swaggerDamping: document.getElementById('swagger-damping'),
+    swaggerDampingVal: document.getElementById('swagger-damping-val'),
     globalAmplitude: document.getElementById('global-amplitude'),
     globalAmplitudeVal: document.getElementById('global-amplitude-val'),
     animationSpeed: document.getElementById('animation-speed'),
@@ -477,30 +496,51 @@ const gaitPresets = {
     custom: { height: 0.0, hint: null, name: 'Custom', animated: false }
 };
 
-// Swagger animation function - Richard Williams style control
+// Swagger animation function - Full animator control
 function calculateSwaggerPose(time) {
-    // Get individual control values
+    // Get all control values
     const bounceAmp = parseFloat(elements.bounceAmplitude.value);
     const bounceFreq = parseFloat(elements.bounceFrequency.value);
+    const bobDelay = parseFloat(elements.bobDelay.value);
+
     const swayAmp = parseFloat(elements.swayAmplitude.value);
     const swayFreq = parseFloat(elements.swayFrequency.value);
-    const phase = parseFloat(elements.swaggerPhase.value);
+    const swayPhase = parseFloat(elements.swaggerPhase.value);
+
+    const twistAmp = parseFloat(elements.twistAmplitude.value);
+    const twistFreq = parseFloat(elements.twistFrequency.value);
+    const twistPhase = parseFloat(elements.twistPhase.value);
+
     const pitchAmp = parseFloat(elements.pitchAmplitude.value);
+    const pitchPhase = parseFloat(elements.pitchPhase.value);
 
-    // Bounce - vertical oscillation (tied to step rhythm)
-    const bounce = Math.sin(time * bounceFreq * 2 * Math.PI) * bounceAmp;
+    const speedMult = parseFloat(elements.swaggerSpeedMult.value);
+    const damping = parseFloat(elements.swaggerDamping.value);
 
-    // Sway - side-to-side roll (can have different timing than bounce)
-    const sway = Math.sin(time * swayFreq * 2 * Math.PI + phase) * swayAmp;
+    // Apply speed multiplier to time
+    const t = time * speedMult;
 
-    // Pitch - forward/back lean (follows bounce for natural motion)
-    const pitch = Math.sin(time * bounceFreq * 2 * Math.PI) * pitchAmp;
+    // BOUNCE - Vertical oscillation (body up/down)
+    // Bob delay creates lag/follow-through in vertical motion
+    const bounce = Math.sin(t * bounceFreq * 2 * Math.PI + bobDelay) * bounceAmp * damping;
+
+    // SWAY - Lateral roll (side-to-side weight shift)
+    // Phase offset controls timing relative to bounce (overlap/drag)
+    const sway = Math.sin(t * swayFreq * 2 * Math.PI + swayPhase) * swayAmp * damping;
+
+    // TWIST - Body yaw rotation (hip twist)
+    // Independent frequency and phase for counter-animation
+    const twist = Math.sin(t * twistFreq * 2 * Math.PI + twistPhase) * twistAmp * damping;
+
+    // PITCH - Forward/back lean (anticipation/follow-through)
+    // Phase controls when lean happens relative to step
+    const pitch = Math.sin(t * bounceFreq * 2 * Math.PI + pitchPhase) * pitchAmp * damping;
 
     return {
         height: bounce,
         roll: sway,
         pitch: pitch,
-        yaw: 0
+        yaw: twist
     };
 }
 
@@ -512,7 +552,12 @@ function handleBounceAmplitudeChange() {
 
 function handleBounceFrequencyChange() {
     const val = parseFloat(elements.bounceFrequency.value);
-    elements.bounceFrequencyVal.textContent = val.toFixed(1) + ' Hz';
+    elements.bounceFrequencyVal.textContent = val.toFixed(2) + ' Hz';
+}
+
+function handleBobDelayChange() {
+    const val = parseFloat(elements.bobDelay.value);
+    elements.bobDelayVal.textContent = (val * 180 / Math.PI).toFixed(0) + '°';
 }
 
 function handleSwayAmplitudeChange() {
@@ -522,7 +567,7 @@ function handleSwayAmplitudeChange() {
 
 function handleSwayFrequencyChange() {
     const val = parseFloat(elements.swayFrequency.value);
-    elements.swayFrequencyVal.textContent = val.toFixed(1) + ' Hz';
+    elements.swayFrequencyVal.textContent = val.toFixed(2) + ' Hz';
 }
 
 function handleSwaggerPhaseChange() {
@@ -530,61 +575,124 @@ function handleSwaggerPhaseChange() {
     elements.swaggerPhaseVal.textContent = (val * 180 / Math.PI).toFixed(0) + '°';
 }
 
+function handleTwistAmplitudeChange() {
+    const val = parseFloat(elements.twistAmplitude.value);
+    elements.twistAmplitudeVal.textContent = (val * 100).toFixed(0) + 'cm';
+}
+
+function handleTwistFrequencyChange() {
+    const val = parseFloat(elements.twistFrequency.value);
+    elements.twistFrequencyVal.textContent = val.toFixed(2) + ' Hz';
+}
+
+function handleTwistPhaseChange() {
+    const val = parseFloat(elements.twistPhase.value);
+    elements.twistPhaseVal.textContent = (val * 180 / Math.PI).toFixed(0) + '°';
+}
+
 function handlePitchAmplitudeChange() {
     const val = parseFloat(elements.pitchAmplitude.value);
     elements.pitchAmplitudeVal.textContent = (val * 100).toFixed(0) + 'cm';
+}
+
+function handlePitchPhaseChange() {
+    const val = parseFloat(elements.pitchPhase.value);
+    elements.pitchPhaseVal.textContent = (val * 180 / Math.PI).toFixed(0) + '°';
+}
+
+function handleSwaggerSpeedMultChange() {
+    const val = parseFloat(elements.swaggerSpeedMult.value);
+    elements.swaggerSpeedMultVal.textContent = val.toFixed(2) + 'x';
+}
+
+function handleSwaggerDampingChange() {
+    const val = parseFloat(elements.swaggerDamping.value);
+    elements.swaggerDampingVal.textContent = val.toFixed(2) + 'x';
 }
 
 // Swagger preset handlers
 function applySwaggerPreset(preset) {
     const presets = {
         subtle: {
-            bounce: 0.04, bounceFreq: 2.0,
-            sway: 0.06, swayFreq: 1.0,
-            pitch: 0.02, phase: 0
+            bounce: 0.04, bounceFreq: 2.0, bobDelay: 0,
+            sway: 0.06, swayFreq: 1.0, swayPhase: 0,
+            twist: 0.02, twistFreq: 1.5, twistPhase: 1.57,
+            pitch: 0.02, pitchPhase: 0,
+            speed: 0.8, damping: 1.0
         },
         confident: {
-            bounce: 0.08, bounceFreq: 3.0,
-            sway: 0.12, swayFreq: 1.5,
-            pitch: 0.05, phase: 0
+            bounce: 0.08, bounceFreq: 3.0, bobDelay: 0,
+            sway: 0.12, swayFreq: 1.5, swayPhase: 0,
+            twist: 0.05, twistFreq: 2.0, twistPhase: 1.57,
+            pitch: 0.05, pitchPhase: 0,
+            speed: 1.0, damping: 1.0
         },
         dramatic: {
-            bounce: 0.12, bounceFreq: 4.0,
-            sway: 0.18, swayFreq: 2.0,
-            pitch: 0.08, phase: 1.57
+            bounce: 0.12, bounceFreq: 4.0, bobDelay: 0.3,
+            sway: 0.18, swayFreq: 2.0, swayPhase: 1.57,
+            twist: 0.10, twistFreq: 2.5, twistPhase: 3.14,
+            pitch: 0.08, pitchPhase: 0.5,
+            speed: 1.25, damping: 0.9
         },
         bouncy: {
-            bounce: 0.15, bounceFreq: 5.0,
-            sway: 0.08, swayFreq: 2.5,
-            pitch: 0.06, phase: 0
+            bounce: 0.15, bounceFreq: 5.0, bobDelay: 0,
+            sway: 0.08, swayFreq: 2.5, swayPhase: 0.5,
+            twist: 0.06, twistFreq: 3.0, twistPhase: 1.0,
+            pitch: 0.06, pitchPhase: 0,
+            speed: 1.5, damping: 0.95
+        },
+        prowling: {
+            bounce: 0.03, bounceFreq: 1.5, bobDelay: 0.5,
+            sway: 0.15, swayFreq: 1.0, swayPhase: 1.57,
+            twist: 0.08, twistFreq: 1.0, twistPhase: 3.14,
+            pitch: 0.04, pitchPhase: 1.57,
+            speed: 0.7, damping: 1.0
+        },
+        mechanical: {
+            bounce: 0.06, bounceFreq: 4.0, bobDelay: 0,
+            sway: 0.04, swayFreq: 4.0, swayPhase: 0,
+            twist: 0.03, twistFreq: 4.0, twistPhase: 0,
+            pitch: 0.03, pitchPhase: 0,
+            speed: 1.0, damping: 1.0
         }
     };
 
     const p = presets[preset];
     if (!p) return;
 
+    // Set all values
     elements.bounceAmplitude.value = p.bounce;
     elements.bounceFrequency.value = p.bounceFreq;
+    elements.bobDelay.value = p.bobDelay;
     elements.swayAmplitude.value = p.sway;
     elements.swayFrequency.value = p.swayFreq;
+    elements.swaggerPhase.value = p.swayPhase;
+    elements.twistAmplitude.value = p.twist;
+    elements.twistFrequency.value = p.twistFreq;
+    elements.twistPhase.value = p.twistPhase;
     elements.pitchAmplitude.value = p.pitch;
-    elements.swaggerPhase.value = p.phase;
+    elements.pitchPhase.value = p.pitchPhase;
+    elements.swaggerSpeedMult.value = p.speed;
+    elements.swaggerDamping.value = p.damping;
 
-    // Update displays
+    // Update all displays
     handleBounceAmplitudeChange();
     handleBounceFrequencyChange();
+    handleBobDelayChange();
     handleSwayAmplitudeChange();
     handleSwayFrequencyChange();
     handleSwaggerPhaseChange();
+    handleTwistAmplitudeChange();
+    handleTwistFrequencyChange();
+    handleTwistPhaseChange();
     handlePitchAmplitudeChange();
+    handlePitchPhaseChange();
+    handleSwaggerSpeedMultChange();
+    handleSwaggerDampingChange();
 
-    showToast(`Swagger: ${preset} preset`, 'success');
+    showToast(`🎬 ${preset.charAt(0).toUpperCase() + preset.slice(1)} personality`, 'success');
 }
 
-function handleSwaggerAmplitudeChange() {
-    // This function is kept for compatibility but deprecated
-    // Individual controls are now used
-}
 
 function handleGaitPresetChange() {
     const preset = elements.gaitPreset.value;
@@ -1195,10 +1303,17 @@ elements.globalAmplitude.addEventListener('input', handleGlobalAmplitudeChange);
 elements.animationSpeed.addEventListener('input', handleAnimationSpeedChange);
 elements.bounceAmplitude.addEventListener('input', handleBounceAmplitudeChange);
 elements.bounceFrequency.addEventListener('input', handleBounceFrequencyChange);
+elements.bobDelay.addEventListener('input', handleBobDelayChange);
 elements.swayAmplitude.addEventListener('input', handleSwayAmplitudeChange);
 elements.swayFrequency.addEventListener('input', handleSwayFrequencyChange);
 elements.swaggerPhase.addEventListener('input', handleSwaggerPhaseChange);
+elements.twistAmplitude.addEventListener('input', handleTwistAmplitudeChange);
+elements.twistFrequency.addEventListener('input', handleTwistFrequencyChange);
+elements.twistPhase.addEventListener('input', handleTwistPhaseChange);
 elements.pitchAmplitude.addEventListener('input', handlePitchAmplitudeChange);
+elements.pitchPhase.addEventListener('input', handlePitchPhaseChange);
+elements.swaggerSpeedMult.addEventListener('input', handleSwaggerSpeedMultChange);
+elements.swaggerDamping.addEventListener('input', handleSwaggerDampingChange);
 elements.oscFreq.addEventListener('input', handleOscFreqChange);
 
 // Swagger preset buttons

@@ -114,61 +114,112 @@
                         </div>
                     </div>
 
-                    <!-- Swagger Gait Controls - Richard Williams Style Animation Control -->
+                    <!-- Swagger Gait Controls - Full Animator Control -->
                     <div id="swagger-controls" style="display:none;">
-                        <h4>🎬 Swagger Animation Controls</h4>
+                        <h4>🎬 Walk Personality Controls</h4>
 
-                        <div class="swagger-section">
-                            <label class="section-label">Bounce (Vertical)</label>
-                            <div class="oscillator-param">
-                                <label>Amplitude:</label>
-                                <input type="range" id="bounce-amplitude" min="0.0" max="0.15" step="0.01" value="0.08">
-                                <span id="bounce-amplitude-val">8cm</span>
-                            </div>
-                            <div class="oscillator-param">
-                                <label>Frequency:</label>
-                                <input type="range" id="bounce-frequency" min="0.5" max="5.0" step="0.5" value="3.0">
-                                <span id="bounce-frequency-val">3.0 Hz</span>
-                            </div>
-                        </div>
-
-                        <div class="swagger-section">
-                            <label class="section-label">Sway (Side-to-Side)</label>
-                            <div class="oscillator-param">
-                                <label>Amplitude:</label>
-                                <input type="range" id="sway-amplitude" min="0.0" max="0.20" step="0.01" value="0.12">
-                                <span id="sway-amplitude-val">12cm</span>
-                            </div>
-                            <div class="oscillator-param">
-                                <label>Frequency:</label>
-                                <input type="range" id="sway-frequency" min="0.5" max="4.0" step="0.5" value="1.5">
-                                <span id="sway-frequency-val">1.5 Hz</span>
-                            </div>
-                        </div>
-
-                        <div class="swagger-section">
-                            <label class="section-label">Timing & Personality</label>
-                            <div class="oscillator-param">
-                                <label>Phase Offset:</label>
-                                <input type="range" id="swagger-phase" min="0" max="6.28" step="0.1" value="0">
-                                <span id="swagger-phase-val">0°</span>
-                            </div>
-                            <div class="oscillator-param">
-                                <label>Pitch Amt:</label>
-                                <input type="range" id="pitch-amplitude" min="0.0" max="0.10" step="0.01" value="0.05">
-                                <span id="pitch-amplitude-val">5cm</span>
-                            </div>
-                        </div>
-
+                        <!-- Quick Presets -->
                         <div class="swagger-presets">
                             <button class="preset-btn" data-preset="subtle">Subtle</button>
                             <button class="preset-btn" data-preset="confident">Confident</button>
                             <button class="preset-btn" data-preset="dramatic">Dramatic</button>
                             <button class="preset-btn" data-preset="bouncy">Bouncy</button>
+                            <button class="preset-btn" data-preset="prowling">Prowling</button>
+                            <button class="preset-btn" data-preset="mechanical">Mechanical</button>
+                        </div>
+
+                        <!-- Vertical Motion -->
+                        <div class="swagger-section">
+                            <label class="section-label">⬆️ Vertical Motion</label>
+                            <div class="oscillator-param">
+                                <label>Bounce:</label>
+                                <input type="range" id="bounce-amplitude" min="0.0" max="0.15" step="0.01" value="0.08">
+                                <span id="bounce-amplitude-val">8cm</span>
+                            </div>
+                            <div class="oscillator-param">
+                                <label>Bounce Speed:</label>
+                                <input type="range" id="bounce-frequency" min="0.5" max="5.0" step="0.25" value="3.0">
+                                <span id="bounce-frequency-val">3.0 Hz</span>
+                            </div>
+                            <div class="oscillator-param">
+                                <label>Bob Delay:</label>
+                                <input type="range" id="bob-delay" min="0" max="3.14" step="0.1" value="0">
+                                <span id="bob-delay-val">0°</span>
+                            </div>
+                        </div>
+
+                        <!-- Lateral Motion -->
+                        <div class="swagger-section">
+                            <label class="section-label">↔️ Lateral Motion (Sway)</label>
+                            <div class="oscillator-param">
+                                <label>Sway:</label>
+                                <input type="range" id="sway-amplitude" min="0.0" max="0.20" step="0.01" value="0.12">
+                                <span id="sway-amplitude-val">12cm</span>
+                            </div>
+                            <div class="oscillator-param">
+                                <label>Sway Speed:</label>
+                                <input type="range" id="sway-frequency" min="0.5" max="4.0" step="0.25" value="1.5">
+                                <span id="sway-frequency-val">1.5 Hz</span>
+                            </div>
+                            <div class="oscillator-param">
+                                <label>Sway Phase:</label>
+                                <input type="range" id="swagger-phase" min="0" max="6.28" step="0.1" value="0">
+                                <span id="swagger-phase-val">0°</span>
+                            </div>
+                        </div>
+
+                        <!-- Rotational Motion -->
+                        <div class="swagger-section">
+                            <label class="section-label">🔄 Rotational Motion (Twist)</label>
+                            <div class="oscillator-param">
+                                <label>Body Twist:</label>
+                                <input type="range" id="twist-amplitude" min="0.0" max="0.15" step="0.01" value="0.05">
+                                <span id="twist-amplitude-val">5cm</span>
+                            </div>
+                            <div class="oscillator-param">
+                                <label>Twist Speed:</label>
+                                <input type="range" id="twist-frequency" min="0.5" max="4.0" step="0.25" value="2.0">
+                                <span id="twist-frequency-val">2.0 Hz</span>
+                            </div>
+                            <div class="oscillator-param">
+                                <label>Twist Phase:</label>
+                                <input type="range" id="twist-phase" min="0" max="6.28" step="0.1" value="1.57">
+                                <span id="twist-phase-val">90°</span>
+                            </div>
+                        </div>
+
+                        <!-- Forward/Back Motion -->
+                        <div class="swagger-section">
+                            <label class="section-label">↕️ Pitch (Forward Lean)</label>
+                            <div class="oscillator-param">
+                                <label>Pitch:</label>
+                                <input type="range" id="pitch-amplitude" min="0.0" max="0.10" step="0.01" value="0.05">
+                                <span id="pitch-amplitude-val">5cm</span>
+                            </div>
+                            <div class="oscillator-param">
+                                <label>Pitch Phase:</label>
+                                <input type="range" id="pitch-phase" min="0" max="6.28" step="0.1" value="0">
+                                <span id="pitch-phase-val">0°</span>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Timing -->
+                        <div class="swagger-section">
+                            <label class="section-label">⚙️ Advanced Timing</label>
+                            <div class="oscillator-param">
+                                <label>Overall Speed:</label>
+                                <input type="range" id="swagger-speed-mult" min="0.25" max="2.0" step="0.25" value="1.0">
+                                <span id="swagger-speed-mult-val">1.0x</span>
+                            </div>
+                            <div class="oscillator-param">
+                                <label>Damping:</label>
+                                <input type="range" id="swagger-damping" min="0.5" max="1.0" step="0.05" value="1.0">
+                                <span id="swagger-damping-val">1.0x</span>
+                            </div>
                         </div>
 
                         <div class="swagger-hint">
-                            💡 Inspired by Richard Williams - dial in the perfect walk personality!
+                            🎬 Richard Williams principles: Timing, Spacing, Overlap, Follow-through
                         </div>
                     </div>
 
