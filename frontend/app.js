@@ -212,6 +212,10 @@ function updateConnectionUI(connected) {
         elements.yawSlider.disabled = false;
         elements.resetPoseBtn.disabled = false;
 
+        // Enable hand control
+        if (elements.handControlToggle) elements.handControlToggle.disabled = false;
+        if (elements.handSensitivity) elements.handSensitivity.disabled = false;
+
         // Enable gait controls
         elements.gaitPreset.disabled = false;
         elements.walkHeight.disabled = false;
@@ -230,6 +234,14 @@ function updateConnectionUI(connected) {
         elements.motionToggle.disabled = true;
         elements.motionToggle.checked = false;
         state.motionEnabled = false;
+
+        // Disable hand control
+        if (elements.handControlToggle) {
+            elements.handControlToggle.disabled = true;
+            elements.handControlToggle.checked = false;
+            if (window.handControl) window.handControl.stop();
+        }
+        if (elements.handSensitivity) elements.handSensitivity.disabled = false;
 
         // Disable animation and body pose controls
         stopAnimation();
