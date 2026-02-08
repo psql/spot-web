@@ -48,7 +48,8 @@ class HandControl {
             console.log('Creating MediaPipe Hands instance...');
             this.hands = new Hands({
                 locateFile: (file) => {
-                    return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+                    console.log('Loading MediaPipe file:', file);
+                    return `/mediapipe/${file}`;
                 }
             });
 
