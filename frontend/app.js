@@ -15,6 +15,8 @@ const state = {
     gaitPreset: 'normal',
     walkHeight: 0.0,
     locomotionHint: null,
+    swaggerAnimationActive: false,
+    swaggerStartTime: 0,
 };
 
 // WebSocket connections
@@ -346,6 +348,11 @@ async function handleDisconnect() {
         stopAnimation();
     }
 
+    // Stop swagger animation
+    if (state.swaggerAnimationActive) {
+        stopSwaggerAnimation();
+    }
+
     // Disable keyboard motion
     if (state.motionEnabled) {
         elements.motionToggle.checked = false;
@@ -397,6 +404,11 @@ async function handleStop() {
         stopAnimation();
     }
 
+    // Stop swagger animation
+    if (state.swaggerAnimationActive) {
+        stopSwaggerAnimation();
+    }
+
     // Disable keyboard motion
     if (state.motionEnabled) {
         elements.motionToggle.checked = false;
@@ -417,11 +429,22 @@ function handleMotionToggle() {
     if (state.motionEnabled) {
         showToast('Keyboard control enabled - Use WASD/QE', 'info');
         startMotionLoop();
+
+        // Start swagger animation if swagger gait is selected
+        if (state.gaitPreset === 'swagger') {
+            startSwaggerAnimation();
+        }
     } else {
         // Send zero velocity when disabled
-        api.velocity(0, 0, 0);
+        api.call('/api/command/velocity', 'POST', {
+            vx: 0, vy: 0, yaw: 0,
+            body_height: 0, locomotion_hint: null
+        });
         state.currentVelocity = { vx: 0, vy: 0, yaw: 0 };
         updateVelocityDisplay();
+
+        // Stop swagger animation
+        stopSwaggerAnimation();
     }
 }
 
@@ -432,13 +455,35 @@ function handleSpeedSlider() {
 
 // Gait control handlers
 const gaitPresets = {
-    normal: { height: 0.0, hint: null, name: 'Normal Walk' },
-    prowl: { height: -0.15, hint: 4, name: 'Prowl (Low & Slow)' },
-    high_step: { height: 0.15, hint: 1, name: 'High Step' },
-    trot: { height: 0.0, hint: 1, name: 'Trot (Fast)' },
-    crawl: { height: -0.2, hint: 4, name: 'Crawl (Careful)' },
-    custom: { height: 0.0, hint: null, name: 'Custom' }
+    normal: { height: 0.0, hint: null, name: 'Normal Walk', animated: false },
+    prowl: { height: -0.15, hint: 4, name: 'Prowl (Low & Slow)', animated: false },
+    high_step: { height: 0.15, hint: 1, name: 'High Step', animated: false },
+    trot: { height: 0.0, hint: 1, name: 'Trot (Fast)', animated: false },
+    crawl: { height: -0.2, hint: 4, name: 'Crawl (Careful)', animated: false },
+    swagger: { height: 0.0, hint: 1, name: '🕺 Swagger', animated: true },
+    custom: { height: 0.0, hint: null, name: 'Custom', animated: false }
 };
+
+// Swagger animation function (double bounce + sway)
+function calculateSwaggerPose(time) {
+    // Double bounce - two bounces per cycle
+    const bounceFreq = 3.0; // Hz - faster for walking rhythm
+    const bounce = Math.sin(time * bounceFreq * 2 * Math.PI) * 0.08;
+
+    // Sway - slower side-to-side
+    const swayFreq = 1.5; // Hz
+    const sway = Math.sin(time * swayFreq * 2 * Math.PI) * 0.12;
+
+    // Slight forward pitch for swagger
+    const pitch = Math.sin(time * bounceFreq * 2 * Math.PI) * 0.05;
+
+    return {
+        height: bounce,
+        roll: sway,
+        pitch: pitch,
+        yaw: 0
+    };
+}
 
 function handleGaitPresetChange() {
     const preset = elements.gaitPreset.value;
@@ -452,7 +497,16 @@ function handleGaitPresetChange() {
         elements.walkHeight.value = gait.height;
         elements.walkHeightVal.textContent = gait.height.toFixed(2) + 'm';
 
+        // Handle swagger animation
+        if (preset === 'swagger' && state.motionEnabled) {
+            startSwaggerAnimation();
+        } else {
+            stopSwaggerAnimation();
+        }
+
         showToast(`Gait: ${gait.name}`, 'info');
+    } else {
+        stopSwaggerAnimation();
     }
 }
 
@@ -740,6 +794,51 @@ function animationLoop() {
 
     // Continue animation loop
     state.animationFrame = requestAnimationFrame(animationLoop);
+}
+
+// Swagger animation (runs during walking)
+function startSwaggerAnimation() {
+    if (state.swaggerAnimationActive) return;
+
+    state.swaggerAnimationActive = true;
+    state.swaggerStartTime = Date.now();
+    swaggerAnimationLoop();
+}
+
+function stopSwaggerAnimation() {
+    state.swaggerAnimationActive = false;
+
+    // Reset pose to gait default
+    if (state.connected) {
+        api.call('/api/command/body-pose', 'POST', {
+            height: 0,
+            roll: 0,
+            pitch: 0,
+            yaw: 0
+        });
+    }
+}
+
+function swaggerAnimationLoop() {
+    if (!state.swaggerAnimationActive) return;
+
+    // Calculate time since swagger started
+    const elapsed = (Date.now() - state.swaggerStartTime) / 1000;
+
+    // Calculate swagger pose (double bounce + sway)
+    const pose = calculateSwaggerPose(elapsed);
+
+    // Send pose update at 10Hz
+    const now = Date.now();
+    if (now - state.lastPoseSend >= 100) {
+        api.call('/api/command/body-pose', 'POST', pose).catch(err => {
+            console.error('Swagger pose update failed:', err);
+        });
+        state.lastPoseSend = now;
+    }
+
+    // Continue loop
+    requestAnimationFrame(swaggerAnimationLoop);
 }
 
 // Keyboard handling
