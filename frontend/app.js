@@ -119,6 +119,11 @@ const elements = {
     walkHeight: document.getElementById('walk-height'),
     walkHeightVal: document.getElementById('walk-height-val'),
 
+    // Hand control
+    handControlToggle: document.getElementById('hand-control-toggle'),
+    handSensitivity: document.getElementById('hand-sensitivity'),
+    handSensitivityVal: document.getElementById('hand-sensitivity-val'),
+
     // Debug
     testConnectionBtn: document.getElementById('test-connection-btn'),
     testResults: document.getElementById('test-results'),
