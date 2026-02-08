@@ -51,6 +51,9 @@ const elements = {
     animationStopBtn: document.getElementById('animation-stop-btn'),
     animationStatus: document.getElementById('animation-status'),
     oscillatorControls: document.getElementById('oscillator-controls'),
+    swaggerControls: document.getElementById('swagger-controls'),
+    swaggerAmplitude: document.getElementById('swagger-amplitude'),
+    swaggerAmplitudeVal: document.getElementById('swagger-amplitude-val'),
     globalAmplitude: document.getElementById('global-amplitude'),
     globalAmplitudeVal: document.getElementById('global-amplitude-val'),
     animationSpeed: document.getElementById('animation-speed'),
@@ -466,16 +469,19 @@ const gaitPresets = {
 
 // Swagger animation function (double bounce + sway)
 function calculateSwaggerPose(time) {
+    // Get swagger amplitude (separate from global amplitude)
+    const swaggerAmp = parseFloat(elements.swaggerAmplitude.value);
+
     // Double bounce - two bounces per cycle
     const bounceFreq = 3.0; // Hz - faster for walking rhythm
-    const bounce = Math.sin(time * bounceFreq * 2 * Math.PI) * 0.08;
+    const bounce = Math.sin(time * bounceFreq * 2 * Math.PI) * 0.08 * swaggerAmp;
 
     // Sway - slower side-to-side
     const swayFreq = 1.5; // Hz
-    const sway = Math.sin(time * swayFreq * 2 * Math.PI) * 0.12;
+    const sway = Math.sin(time * swayFreq * 2 * Math.PI) * 0.12 * swaggerAmp;
 
     // Slight forward pitch for swagger
-    const pitch = Math.sin(time * bounceFreq * 2 * Math.PI) * 0.05;
+    const pitch = Math.sin(time * bounceFreq * 2 * Math.PI) * 0.05 * swaggerAmp;
 
     return {
         height: bounce,
@@ -487,7 +493,22 @@ function calculateSwaggerPose(time) {
 
 function handleGaitPresetChange() {
     const preset = elements.gaitPreset.value;
+    const oldPreset = state.gaitPreset;
     state.gaitPreset = preset;
+
+    // Show/hide swagger controls
+    if (preset === 'swagger') {
+        elements.swaggerControls.style.display = 'block';
+    } else {
+        elements.swaggerControls.style.display = 'none';
+    }
+
+    // Show/hide custom oscillator controls
+    if (preset === 'custom') {
+        elements.oscillatorControls.style.display = 'block';
+    } else {
+        elements.oscillatorControls.style.display = 'none';
+    }
 
     if (preset !== 'custom') {
         const gait = gaitPresets[preset];
@@ -497,17 +518,27 @@ function handleGaitPresetChange() {
         elements.walkHeight.value = gait.height;
         elements.walkHeightVal.textContent = gait.height.toFixed(2) + 'm';
 
-        // Handle swagger animation
-        if (preset === 'swagger' && state.motionEnabled) {
-            startSwaggerAnimation();
+        // Handle swagger animation - start if motion is enabled
+        if (preset === 'swagger') {
+            if (state.motionEnabled) {
+                startSwaggerAnimation();
+            }
         } else {
-            stopSwaggerAnimation();
+            // Stop swagger if switching away from it
+            if (oldPreset === 'swagger') {
+                stopSwaggerAnimation();
+            }
         }
 
         showToast(`Gait: ${gait.name}`, 'info');
     } else {
         stopSwaggerAnimation();
     }
+}
+
+function handleSwaggerAmplitudeChange() {
+    const amp = parseFloat(elements.swaggerAmplitude.value);
+    elements.swaggerAmplitudeVal.textContent = amp.toFixed(1) + 'x';
 }
 
 function handleWalkHeightChange() {
@@ -840,14 +871,17 @@ function updateVelocityDisplay() {
 }
 
 async function sendVelocityIfChanged(newVel) {
-    // Check if velocity changed or if swagger is active (needs continuous updates)
+    // When swagger is active, ALWAYS send updates for continuous animation
+    // Otherwise, only send when velocity changes or needs keepalive
     const changed =
         Math.abs(newVel.vx - state.currentVelocity.vx) > 0.01 ||
         Math.abs(newVel.vy - state.currentVelocity.vy) > 0.01 ||
         Math.abs(newVel.yaw - state.currentVelocity.yaw) > 0.01;
 
-    const needsUpdate = changed || state.swaggerAnimationActive ||
-        (Date.now() - state.lastVelocitySend > 100 && (newVel.vx !== 0 || newVel.vy !== 0 || newVel.yaw !== 0));
+    const needsKeepalive = (Date.now() - state.lastVelocitySend > 100) &&
+                          (newVel.vx !== 0 || newVel.vy !== 0 || newVel.yaw !== 0);
+
+    const needsUpdate = changed || state.swaggerAnimationActive || needsKeepalive;
 
     if (needsUpdate) {
         // Calculate dynamic body pose if swagger is active
@@ -860,7 +894,7 @@ async function sendVelocityIfChanged(newVel) {
             const elapsed = (Date.now() - state.swaggerStartTime) / 1000;
             const swaggerPose = calculateSwaggerPose(elapsed);
 
-            // Combine base walk height with swagger pose
+            // LAYER: Add swagger oscillations on top of base walk height
             bodyHeight = state.walkHeight + swaggerPose.height;
             bodyRoll = swaggerPose.roll;
             bodyPitch = swaggerPose.pitch;
@@ -868,14 +902,15 @@ async function sendVelocityIfChanged(newVel) {
         }
 
         // Send with full gait and body pose params
+        // This single command combines: velocity (WASD) + body pose (swagger)
         await api.call('/api/command/velocity', 'POST', {
-            vx: newVel.vx,
-            vy: newVel.vy,
-            yaw: newVel.yaw,
-            body_height: bodyHeight,
-            body_roll: bodyRoll,
-            body_pitch: bodyPitch,
-            body_yaw: bodyYaw,
+            vx: newVel.vx,        // From WASD keys
+            vy: newVel.vy,        // From WASD keys
+            yaw: newVel.yaw,      // From Q/E keys
+            body_height: bodyHeight,  // Base height + swagger bounce
+            body_roll: bodyRoll,      // Swagger sway
+            body_pitch: bodyPitch,    // Swagger pitch
+            body_yaw: bodyYaw,        // Swagger body rotation
             locomotion_hint: state.locomotionHint
         });
 
@@ -889,7 +924,12 @@ function motionLoop() {
     if (!state.motionEnabled) return;
 
     const newVel = calculateVelocityFromKeys();
-    sendVelocityIfChanged(newVel);
+
+    // Always send velocity when motion enabled, even if zero
+    // This ensures swagger animation continues to update
+    if (state.swaggerAnimationActive || newVel.vx !== 0 || newVel.vy !== 0 || newVel.yaw !== 0) {
+        sendVelocityIfChanged(newVel);
+    }
 
     requestAnimationFrame(motionLoop);
 }
@@ -1058,6 +1098,7 @@ elements.animationPlayBtn.addEventListener('click', startAnimation);
 elements.animationStopBtn.addEventListener('click', stopAnimation);
 elements.globalAmplitude.addEventListener('input', handleGlobalAmplitudeChange);
 elements.animationSpeed.addEventListener('input', handleAnimationSpeedChange);
+elements.swaggerAmplitude.addEventListener('input', handleSwaggerAmplitudeChange);
 elements.oscFreq.addEventListener('input', handleOscFreqChange);
 elements.heightSlider.addEventListener('input', handleHeightSlider);
 elements.rollSlider.addEventListener('input', handleRollSlider);
