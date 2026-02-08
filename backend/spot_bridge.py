@@ -397,43 +397,32 @@ class SpotBridge:
             body_pitch = max(-0.3, min(0.3, body_pitch))
             body_yaw = max(-0.3, min(0.3, body_yaw))
 
-            # Build mobility params with body control if needed
-            has_body_control = (body_height != 0.0 or body_roll != 0.0 or
-                               body_pitch != 0.0 or body_yaw != 0.0)
-
-            if has_body_control or locomotion_hint is not None:
-                # Create body orientation
-                footprint_R_body = EulerZXY(yaw=body_yaw, roll=body_roll, pitch=body_pitch)
-
-                # Create SE3Trajectory for body offset
-                body_traj = trajectory_pb2.SE3Trajectory(
-                    points=[
-                        trajectory_pb2.SE3TrajectoryPoint(
-                            pose=geometry_pb2.SE3Pose(
-                                position=geometry_pb2.Vec3(x=0, y=0, z=body_height),
-                                rotation=footprint_R_body.to_quaternion()
-                            )
-                        )
-                    ]
-                )
-
-                # Create mobility params with base_offset_rt_footprint
-                mobility_params = spot_command_pb2.MobilityParams(
-                    body_control=spot_command_pb2.BodyControlParams(
-                        base_offset_rt_footprint=body_traj
-                    ),
-                    locomotion_hint=locomotion_hint if locomotion_hint is not None else 1
-                )
-
+            # Use body_height directly for now (SDK supports this)
+            # Full body control (roll/pitch/yaw) during velocity may require different approach
+            if body_height != 0.0:
+                logger.debug(f"Using body_height: {body_height:.3f}")
                 cmd = RobotCommandBuilder.synchro_velocity_command(
                     v_x=vx, v_y=vy, v_rot=yaw,
-                    params=mobility_params
+                    body_height=body_height,
+                    locomotion_hint=locomotion_hint if locomotion_hint is not None else 1
+                )
+            elif locomotion_hint is not None:
+                cmd = RobotCommandBuilder.synchro_velocity_command(
+                    v_x=vx, v_y=vy, v_rot=yaw,
+                    locomotion_hint=locomotion_hint
                 )
             else:
                 cmd = RobotCommandBuilder.synchro_velocity_command(
                     v_x=vx, v_y=vy, v_rot=yaw,
                     params=None
                 )
+
+            # If we have roll/pitch/yaw during walking, send separate body adjustment
+            # (This is a workaround - Spot may not support full 6DOF control during velocity)
+            if (body_roll != 0.0 or body_pitch != 0.0 or body_yaw != 0.0) and (vx != 0 or vy != 0 or yaw != 0):
+                logger.debug(f"Walking with body orientation: roll={body_roll:.3f}, pitch={body_pitch:.3f}, yaw={body_yaw:.3f}")
+                # For now, log this - full body control during velocity needs more research
+                # The SDK may not support roll/pitch/yaw during active locomotion
 
             # Send with end time
             end_time = time.time() + 0.25

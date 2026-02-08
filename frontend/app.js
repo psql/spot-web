@@ -52,6 +52,11 @@ const elements = {
     animationStatus: document.getElementById('animation-status'),
     oscillatorControls: document.getElementById('oscillator-controls'),
     swaggerControls: document.getElementById('swagger-controls'),
+    tailwagControls: document.getElementById('tailwag-controls'),
+    tailwagIntensity: document.getElementById('tailwag-intensity'),
+    tailwagIntensityVal: document.getElementById('tailwag-intensity-val'),
+    tailwagSpeed: document.getElementById('tailwag-speed'),
+    tailwagSpeedVal: document.getElementById('tailwag-speed-val'),
     // Bounce controls
     bounceAmplitude: document.getElementById('bounce-amplitude'),
     bounceAmplitudeVal: document.getElementById('bounce-amplitude-val'),
@@ -823,6 +828,33 @@ async function handleResetPose() {
 
 // Animation system
 const animations = {
+    tailwag: {
+        name: 'Tail Wag',
+        calculate: (t, amp) => {
+            const intensity = parseFloat(elements.tailwagIntensity.value);
+            const speed = parseFloat(elements.tailwagSpeed.value);
+
+            // Play bow pose: head down, butt up
+            const bowPitch = -0.25; // Head down significantly
+            const bowHeight = -0.1; // Lower front, keep back up
+
+            // Hip wiggle - fast yaw oscillation
+            const wiggle = Math.sin(t * speed * 2 * Math.PI) * 0.20 * intensity;
+
+            // Side-to-side weight shift during wag
+            const wiggleRoll = Math.sin(t * speed * 2 * Math.PI + Math.PI/2) * 0.10 * intensity;
+
+            // Slight bounce in the bow
+            const excitedBounce = Math.sin(t * speed * 2 * Math.PI) * 0.05 * intensity;
+
+            return {
+                height: bowHeight + excitedBounce,
+                roll: wiggleRoll,
+                pitch: bowPitch,
+                yaw: wiggle
+            };
+        }
+    },
     bounce: {
         name: 'Bounce',
         calculate: (t, amp) => ({
@@ -893,11 +925,20 @@ const animations = {
 
 function handleAnimationPresetChange() {
     const preset = elements.animationPreset.value;
-    if (preset === 'custom') {
-        elements.oscillatorControls.style.display = 'block';
-    } else {
-        elements.oscillatorControls.style.display = 'none';
-    }
+
+    // Show/hide relevant controls
+    elements.oscillatorControls.style.display = (preset === 'custom') ? 'block' : 'none';
+    elements.tailwagControls.style.display = (preset === 'tailwag') ? 'block' : 'none';
+}
+
+function handleTailwagIntensityChange() {
+    const val = parseFloat(elements.tailwagIntensity.value);
+    elements.tailwagIntensityVal.textContent = val.toFixed(1) + 'x';
+}
+
+function handleTailwagSpeedChange() {
+    const val = parseFloat(elements.tailwagSpeed.value);
+    elements.tailwagSpeedVal.textContent = val.toFixed(1) + ' Hz';
 }
 
 function handleOscFreqChange() {
@@ -1314,6 +1355,8 @@ elements.pitchAmplitude.addEventListener('input', handlePitchAmplitudeChange);
 elements.pitchPhase.addEventListener('input', handlePitchPhaseChange);
 elements.swaggerSpeedMult.addEventListener('input', handleSwaggerSpeedMultChange);
 elements.swaggerDamping.addEventListener('input', handleSwaggerDampingChange);
+elements.tailwagIntensity.addEventListener('input', handleTailwagIntensityChange);
+elements.tailwagSpeed.addEventListener('input', handleTailwagSpeedChange);
 elements.oscFreq.addEventListener('input', handleOscFreqChange);
 
 // Swagger preset buttons
