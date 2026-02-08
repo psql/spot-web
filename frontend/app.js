@@ -1370,3 +1370,28 @@ updateConnectionUI(false);
 // Connect WebSockets
 connectTelemetryWebSocket();
 connectLogsWebSocket();
+
+// Hand control integration
+if (elements.handControlToggle) {
+    elements.handControlToggle.addEventListener('change', () => {
+        if (elements.handControlToggle.checked) {
+            window.handControl.start();
+            showToast('🖐️ Hand tracking enabled!', 'success');
+        } else {
+            window.handControl.stop();
+            showToast('Hand tracking disabled', 'info');
+        }
+    });
+}
+
+if (elements.handSensitivity) {
+    elements.handSensitivity.addEventListener('input', () => {
+        const sensitivity = parseFloat(elements.handSensitivity.value);
+        elements.handSensitivityVal.textContent = sensitivity.toFixed(1) + 'x';
+        if (window.handControl) {
+            window.handControl.setSensitivity(sensitivity);
+        }
+    });
+}
+
+console.log('Hand control ready!');

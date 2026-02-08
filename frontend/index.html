@@ -343,9 +343,54 @@
         </div>
     </div>
 
+    <!-- Hand Control Panel -->
+    <section class="panel hand-control-panel">
+        <h2>🖐️ Hand Control</h2>
+        <div class="hand-controls">
+            <div class="hand-toggle">
+                <label class="toggle-switch">
+                    <input type="checkbox" id="hand-control-toggle" disabled>
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">Enable Hand Tracking</span>
+                </label>
+            </div>
+
+            <div class="hand-preview">
+                <video id="hand-video" autoplay playsinline></video>
+                <canvas id="hand-canvas"></canvas>
+            </div>
+
+            <div class="hand-info">
+                <div class="hand-status">
+                    <span id="hand-status">No hand detected</span>
+                </div>
+                <div class="hand-orientation">
+                    <div>Hand Roll: <span id="hand-roll">0.0°</span></div>
+                    <div>Hand Pitch: <span id="hand-pitch">0.0°</span></div>
+                    <div>Hand Yaw: <span id="hand-yaw">0.0°</span></div>
+                </div>
+            </div>
+
+            <div class="hand-controls-settings">
+                <div class="hand-param">
+                    <label>Sensitivity:</label>
+                    <input type="range" id="hand-sensitivity" min="0.5" max="2.0" step="0.1" value="1.0" disabled>
+                    <span id="hand-sensitivity-val">1.0x</span>
+                </div>
+                <div class="hand-hint">
+                    💡 Hold your hand flat, palm down. Tilt to control Spot's body!
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Toast notification -->
     <div id="toast" class="toast"></div>
 
+    <!-- MediaPipe -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="/hand-control.js"></script>
     <script src="/app.js"></script>
 </body>
 </html>
