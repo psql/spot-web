@@ -81,29 +81,67 @@
             <!-- Body Pose Control Panel -->
             <section class="panel body-pose-panel">
                 <h2>Body Pose Control</h2>
-                <div class="body-pose-controls">
-                    <div class="pose-control">
-                        <label for="height-slider">Height:</label>
-                        <input type="range" id="height-slider" min="-0.3" max="0.3" step="0.01" value="0" disabled>
-                        <span id="height-value">0.00m</span>
+
+                <!-- Animation Mode -->
+                <div class="animation-mode">
+                    <h3>Animation Mode</h3>
+                    <div class="animation-controls">
+                        <select id="animation-preset" disabled>
+                            <option value="none">Manual Control</option>
+                            <option value="bounce">Bounce</option>
+                            <option value="sway">Sway</option>
+                            <option value="figure8">Figure 8</option>
+                            <option value="circle">Circle</option>
+                            <option value="wave">Wave</option>
+                            <option value="dance">Dance</option>
+                            <option value="custom">Custom Oscillator</option>
+                        </select>
+                        <button id="animation-play-btn" class="btn btn-success" disabled>▶ Play</button>
+                        <button id="animation-stop-btn" class="btn btn-secondary" disabled style="display:none;">■ Stop</button>
                     </div>
-                    <div class="pose-control">
-                        <label for="roll-slider">Roll:</label>
-                        <input type="range" id="roll-slider" min="-0.3" max="0.3" step="0.01" value="0" disabled>
-                        <span id="roll-value">0.00°</span>
+
+                    <!-- Custom Oscillator Controls -->
+                    <div id="oscillator-controls" style="display:none;">
+                        <div class="oscillator-param">
+                            <label>Frequency:</label>
+                            <input type="range" id="osc-freq" min="0.1" max="2.0" step="0.1" value="0.5">
+                            <span id="osc-freq-val">0.5 Hz</span>
+                        </div>
+                        <div class="oscillator-param">
+                            <label>Amplitude:</label>
+                            <input type="range" id="osc-amp" min="0.1" max="1.0" step="0.1" value="0.5">
+                            <span id="osc-amp-val">0.5x</span>
+                        </div>
                     </div>
-                    <div class="pose-control">
-                        <label for="pitch-slider">Pitch:</label>
-                        <input type="range" id="pitch-slider" min="-0.3" max="0.3" step="0.01" value="0" disabled>
-                        <span id="pitch-value">0.00°</span>
-                    </div>
-                    <div class="pose-control">
-                        <label for="yaw-slider">Yaw:</label>
-                        <input type="range" id="yaw-slider" min="-0.3" max="0.3" step="0.01" value="0" disabled>
-                        <span id="yaw-value">0.00°</span>
-                    </div>
-                    <div class="pose-buttons">
-                        <button id="reset-pose-btn" class="btn btn-secondary" disabled>Reset to Default</button>
+                </div>
+
+                <!-- Manual Controls -->
+                <div class="manual-controls">
+                    <h3>Manual Control</h3>
+                    <div class="body-pose-controls">
+                        <div class="pose-control">
+                            <label for="height-slider">Height:</label>
+                            <input type="range" id="height-slider" min="-0.3" max="0.3" step="0.01" value="0" disabled>
+                            <span id="height-value">0.00m</span>
+                        </div>
+                        <div class="pose-control">
+                            <label for="roll-slider">Roll:</label>
+                            <input type="range" id="roll-slider" min="-0.3" max="0.3" step="0.01" value="0" disabled>
+                            <span id="roll-value">0.00°</span>
+                        </div>
+                        <div class="pose-control">
+                            <label for="pitch-slider">Pitch:</label>
+                            <input type="range" id="pitch-slider" min="-0.3" max="0.3" step="0.01" value="0" disabled>
+                            <span id="pitch-value">0.00°</span>
+                        </div>
+                        <div class="pose-control">
+                            <label for="yaw-slider">Yaw:</label>
+                            <input type="range" id="yaw-slider" min="-0.3" max="0.3" step="0.01" value="0" disabled>
+                            <span id="yaw-value">0.00°</span>
+                        </div>
+                        <div class="pose-buttons">
+                            <button id="reset-pose-btn" class="btn btn-secondary" disabled>Reset to Default</button>
+                        </div>
                     </div>
                 </div>
             </section>

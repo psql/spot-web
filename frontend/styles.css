@@ -230,6 +230,76 @@ header h1 {
 }
 
 /* Body pose panel */
+.body-pose-panel h3 {
+    font-size: 1rem;
+    margin-top: 15px;
+    margin-bottom: 10px;
+    color: #00d9ff;
+}
+
+.animation-mode {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.animation-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.animation-controls select {
+    flex: 1;
+    min-width: 150px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: #e0e0e0;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.animation-controls select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#oscillator-controls {
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+}
+
+.oscillator-param {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.oscillator-param label {
+    min-width: 90px;
+    font-weight: 600;
+}
+
+.oscillator-param input[type="range"] {
+    flex: 1;
+}
+
+.oscillator-param span {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    min-width: 60px;
+}
+
+.manual-controls {
+    margin-top: 15px;
+}
+
 .body-pose-controls {
     display: flex;
     flex-direction: column;
