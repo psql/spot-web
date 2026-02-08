@@ -386,7 +386,7 @@ class SpotBridge:
         try:
             from bosdyn.api.spot import robot_command_pb2 as spot_command_pb2
             from bosdyn.geometry import EulerZXY
-            from bosdyn.api import geometry_pb2
+            from bosdyn.api import geometry_pb2, trajectory_pb2
 
             # Clamp to safe ranges
             vx = max(-0.5, min(0.5, vx))
@@ -406,9 +406,9 @@ class SpotBridge:
                 footprint_R_body = EulerZXY(yaw=body_yaw, roll=body_roll, pitch=body_pitch)
 
                 # Create SE3Trajectory for body offset
-                body_traj = geometry_pb2.SE3Trajectory(
+                body_traj = trajectory_pb2.SE3Trajectory(
                     points=[
-                        geometry_pb2.SE3TrajectoryPoint(
+                        trajectory_pb2.SE3TrajectoryPoint(
                             pose=geometry_pb2.SE3Pose(
                                 position=geometry_pb2.Vec3(x=0, y=0, z=body_height),
                                 rotation=footprint_R_body.to_quaternion()
