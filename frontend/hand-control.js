@@ -21,13 +21,31 @@ class HandControl {
     }
 
     async initialize() {
+        console.log('Initializing hand tracking...');
+        console.log('MediaPipe Hands available:', !!window.Hands);
+        console.log('Camera utils available:', !!window.Camera);
+
         if (!window.Hands) {
-            console.error('MediaPipe Hands not loaded');
+            console.error('MediaPipe Hands not loaded from CDN');
+            alert('MediaPipe libraries not loaded. Check internet connection.');
+            return false;
+        }
+
+        if (!window.Camera) {
+            console.error('Camera utils not loaded from CDN');
+            alert('Camera utilities not loaded. Check internet connection.');
             return false;
         }
 
         try {
+            // Test camera access first
+            console.log('Requesting camera access...');
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            console.log('✅ Camera access granted!');
+            stream.getTracks().forEach(track => track.stop()); // Stop test stream
+
             // Initialize MediaPipe Hands
+            console.log('Creating MediaPipe Hands instance...');
             this.hands = new Hands({
                 locateFile: (file) => {
                     return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
@@ -37,13 +55,14 @@ class HandControl {
             this.hands.setOptions({
                 maxNumHands: 1,
                 modelComplexity: 1,
-                minDetectionConfidence: 0.7,
-                minTrackingConfidence: 0.7
+                minDetectionConfidence: 0.5,
+                minTrackingConfidence: 0.5
             });
 
             this.hands.onResults((results) => this.onResults(results));
 
             // Start camera
+            console.log('Starting camera...');
             this.camera = new Camera(this.video, {
                 onFrame: async () => {
                     if (this.hands) {
@@ -55,6 +74,7 @@ class HandControl {
             });
 
             await this.camera.start();
+            console.log('✅ Camera started!');
 
             // Set canvas size
             this.canvas.width = 640;
@@ -63,6 +83,16 @@ class HandControl {
             return true;
         } catch (error) {
             console.error('Failed to initialize hand tracking:', error);
+            console.error('Error details:', error.message, error.name);
+
+            if (error.name === 'NotAllowedError') {
+                alert('Camera access denied. Please allow camera access in browser settings.');
+            } else if (error.name === 'NotFoundError') {
+                alert('No camera found. Please connect a webcam.');
+            } else {
+                alert(`Hand tracking error: ${error.message}`);
+            }
+
             return false;
         }
     }
