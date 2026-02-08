@@ -622,80 +622,60 @@ function applySwaggerPreset(preset) {
     const presets = {
         subtle: {
             bounce: 0.04, bounceFreq: 2.0, bobDelay: 0,
-            sway: 0.06, swayFreq: 1.0, swayPhase: 0,
-            twist: 0.02, twistFreq: 1.5, twistPhase: 1.57,
-            pitch: 0.02, pitchPhase: 0,
-            speed: 0.8, damping: 1.0
+            sway: 0.06, swayFreq: 1.0, swayPhase: 0
         },
         confident: {
             bounce: 0.08, bounceFreq: 3.0, bobDelay: 0,
-            sway: 0.12, swayFreq: 1.5, swayPhase: 0,
-            twist: 0.05, twistFreq: 2.0, twistPhase: 1.57,
-            pitch: 0.05, pitchPhase: 0,
-            speed: 1.0, damping: 1.0
+            sway: 0.12, swayFreq: 1.5, swayPhase: 0
         },
         dramatic: {
             bounce: 0.12, bounceFreq: 4.0, bobDelay: 0.3,
-            sway: 0.18, swayFreq: 2.0, swayPhase: 1.57,
-            twist: 0.10, twistFreq: 2.5, twistPhase: 3.14,
-            pitch: 0.08, pitchPhase: 0.5,
-            speed: 1.25, damping: 0.9
+            sway: 0.18, swayFreq: 2.0, swayPhase: 1.57
         },
         bouncy: {
             bounce: 0.15, bounceFreq: 5.0, bobDelay: 0,
-            sway: 0.08, swayFreq: 2.5, swayPhase: 0.5,
-            twist: 0.06, twistFreq: 3.0, twistPhase: 1.0,
-            pitch: 0.06, pitchPhase: 0,
-            speed: 1.5, damping: 0.95
+            sway: 0.08, swayFreq: 2.5, swayPhase: 0.5
         },
         prowling: {
             bounce: 0.03, bounceFreq: 1.5, bobDelay: 0.5,
-            sway: 0.15, swayFreq: 1.0, swayPhase: 1.57,
-            twist: 0.08, twistFreq: 1.0, twistPhase: 3.14,
-            pitch: 0.04, pitchPhase: 1.57,
-            speed: 0.7, damping: 1.0
+            sway: 0.15, swayFreq: 1.0, swayPhase: 1.57
         },
         mechanical: {
             bounce: 0.06, bounceFreq: 4.0, bobDelay: 0,
-            sway: 0.04, swayFreq: 4.0, swayPhase: 0,
-            twist: 0.03, twistFreq: 4.0, twistPhase: 0,
-            pitch: 0.03, pitchPhase: 0,
-            speed: 1.0, damping: 1.0
+            sway: 0.04, swayFreq: 4.0, swayPhase: 0
         }
     };
 
     const p = presets[preset];
     if (!p) return;
 
-    // Set all values
-    elements.bounceAmplitude.value = p.bounce;
-    elements.bounceFrequency.value = p.bounceFreq;
-    elements.bobDelay.value = p.bobDelay;
-    elements.swayAmplitude.value = p.sway;
-    elements.swayFrequency.value = p.swayFreq;
-    elements.swaggerPhase.value = p.swayPhase;
-    elements.twistAmplitude.value = p.twist;
-    elements.twistFrequency.value = p.twistFreq;
-    elements.twistPhase.value = p.twistPhase;
-    elements.pitchAmplitude.value = p.pitch;
-    elements.pitchPhase.value = p.pitchPhase;
-    elements.swaggerSpeedMult.value = p.speed;
-    elements.swaggerDamping.value = p.damping;
+    console.log('Applying preset:', preset, p);
 
-    // Update all displays
-    handleBounceAmplitudeChange();
-    handleBounceFrequencyChange();
-    handleBobDelayChange();
-    handleSwayAmplitudeChange();
-    handleSwayFrequencyChange();
-    handleSwaggerPhaseChange();
-    handleTwistAmplitudeChange();
-    handleTwistFrequencyChange();
-    handleTwistPhaseChange();
-    handlePitchAmplitudeChange();
-    handlePitchPhaseChange();
-    handleSwaggerSpeedMultChange();
-    handleSwaggerDampingChange();
+    // Set values only for elements that exist
+    if (elements.bounceAmplitude) {
+        elements.bounceAmplitude.value = p.bounce;
+        handleBounceAmplitudeChange();
+    }
+    if (elements.bounceFrequency) {
+        elements.bounceFrequency.value = p.bounceFreq;
+        handleBounceFrequencyChange();
+    }
+    if (elements.bobDelay) {
+        elements.bobDelay.value = p.bobDelay;
+        handleBobDelayChange();
+    }
+    if (elements.swayAmplitude) {
+        elements.swayAmplitude.value = p.sway;
+        handleSwayAmplitudeChange();
+    }
+    if (elements.swayFrequency) {
+        elements.swayFrequency.value = p.swayFreq;
+        handleSwayFrequencyChange();
+    }
+    if (elements.swaggerPhase) {
+        elements.swaggerPhase.value = p.swayPhase;
+        handleSwaggerPhaseChange();
+    }
 
     showToast(`🎬 ${preset.charAt(0).toUpperCase() + preset.slice(1)} personality`, 'success');
 }
