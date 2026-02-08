@@ -503,51 +503,29 @@ const gaitPresets = {
     custom: { height: 0.0, hint: null, name: 'Custom', animated: false }
 };
 
-// Swagger animation function - Full animator control
+// Swagger animation function - Simplified for walking
 function calculateSwaggerPose(time) {
-    // Get all control values
-    const bounceAmp = parseFloat(elements.bounceAmplitude.value);
-    const bounceFreq = parseFloat(elements.bounceFrequency.value);
-    const bobDelay = parseFloat(elements.bobDelay.value);
+    // Get control values with null checks
+    const bounceAmp = elements.bounceAmplitude ? parseFloat(elements.bounceAmplitude.value) : 0.08;
+    const bounceFreq = elements.bounceFrequency ? parseFloat(elements.bounceFrequency.value) : 3.0;
+    const bobDelay = elements.bobDelay ? parseFloat(elements.bobDelay.value) : 0;
 
-    const swayAmp = parseFloat(elements.swayAmplitude.value);
-    const swayFreq = parseFloat(elements.swayFrequency.value);
-    const swayPhase = parseFloat(elements.swaggerPhase.value);
-
-    const twistAmp = parseFloat(elements.twistAmplitude.value);
-    const twistFreq = parseFloat(elements.twistFrequency.value);
-    const twistPhase = parseFloat(elements.twistPhase.value);
-
-    const pitchAmp = parseFloat(elements.pitchAmplitude.value);
-    const pitchPhase = parseFloat(elements.pitchPhase.value);
-
-    const speedMult = parseFloat(elements.swaggerSpeedMult.value);
-    const damping = parseFloat(elements.swaggerDamping.value);
-
-    // Apply speed multiplier to time
-    const t = time * speedMult;
+    const swayAmp = elements.swayAmplitude ? parseFloat(elements.swayAmplitude.value) : 0.12;
+    const swayFreq = elements.swayFrequency ? parseFloat(elements.swayFrequency.value) : 1.5;
+    const swayPhase = elements.swaggerPhase ? parseFloat(elements.swaggerPhase.value) : 0;
 
     // BOUNCE - Vertical oscillation (body up/down)
     // Bob delay creates lag/follow-through in vertical motion
-    const bounce = Math.sin(t * bounceFreq * 2 * Math.PI + bobDelay) * bounceAmp * damping;
+    const bounce = Math.sin(time * bounceFreq * 2 * Math.PI + bobDelay) * bounceAmp;
 
-    // SWAY - Lateral roll (side-to-side weight shift)
-    // Phase offset controls timing relative to bounce (overlap/drag)
-    const sway = Math.sin(t * swayFreq * 2 * Math.PI + swayPhase) * swayAmp * damping;
-
-    // TWIST - Body yaw rotation (hip twist)
-    // Independent frequency and phase for counter-animation
-    const twist = Math.sin(t * twistFreq * 2 * Math.PI + twistPhase) * twistAmp * damping;
-
-    // PITCH - Forward/back lean (anticipation/follow-through)
-    // Phase controls when lean happens relative to step
-    const pitch = Math.sin(t * bounceFreq * 2 * Math.PI + pitchPhase) * pitchAmp * damping;
+    // Note: Sway/pitch/yaw don't work during walking (SDK limitation)
+    // Only height is applied during velocity commands
 
     return {
         height: bounce,
-        roll: sway,
-        pitch: pitch,
-        yaw: twist
+        roll: 0,
+        pitch: 0,
+        yaw: 0
     };
 }
 
