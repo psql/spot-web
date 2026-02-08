@@ -708,16 +708,21 @@ function handleGaitPresetChange() {
 
     // Show/hide swagger controls
     if (preset === 'swagger') {
-        elements.swaggerControls.style.display = 'block';
+        if (elements.swaggerControls) {
+            elements.swaggerControls.style.display = 'block';
+            console.log('Showing swagger controls');
+        }
     } else {
-        elements.swaggerControls.style.display = 'none';
+        if (elements.swaggerControls) {
+            elements.swaggerControls.style.display = 'none';
+        }
     }
 
     // Show/hide custom oscillator controls
     if (preset === 'custom') {
-        elements.oscillatorControls.style.display = 'block';
+        if (elements.oscillatorControls) elements.oscillatorControls.style.display = 'block';
     } else {
-        elements.oscillatorControls.style.display = 'none';
+        if (elements.oscillatorControls) elements.oscillatorControls.style.display = 'none';
     }
 
     if (preset !== 'custom') {
@@ -930,10 +935,15 @@ const animations = {
 
 function handleAnimationPresetChange() {
     const preset = elements.animationPreset.value;
+    console.log('Animation preset changed to:', preset);
 
-    // Show/hide relevant controls
-    elements.oscillatorControls.style.display = (preset === 'custom') ? 'block' : 'none';
-    elements.tailwagControls.style.display = (preset === 'tailwag') ? 'block' : 'none';
+    // Show/hide relevant controls with null checks
+    if (elements.oscillatorControls) {
+        elements.oscillatorControls.style.display = (preset === 'custom') ? 'block' : 'none';
+    }
+    if (elements.tailwagControls) {
+        elements.tailwagControls.style.display = (preset === 'tailwag') ? 'block' : 'none';
+    }
 }
 
 function handleTailwagIntensityChange() {
@@ -963,7 +973,9 @@ function handleAnimationSpeedChange() {
 
 function startAnimation() {
     const preset = elements.animationPreset.value;
-    if (preset === 'none') {
+    console.log('Starting animation with preset:', preset);
+
+    if (!preset || preset === 'none') {
         showToast('Select an animation preset first', 'error');
         return;
     }
