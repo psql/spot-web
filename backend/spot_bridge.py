@@ -360,14 +360,17 @@ class SpotBridge:
                 }
             }
 
-    def send_velocity(self, vx: float, vy: float, yaw: float) -> Dict[str, Any]:
+    def send_velocity(self, vx: float, vy: float, yaw: float,
+                      body_height: float = 0.0, locomotion_hint: int = None) -> Dict[str, Any]:
         """
-        Send velocity command to robot.
+        Send velocity command to robot with optional gait customization.
 
         Args:
             vx: Forward velocity in m/s
             vy: Lateral velocity in m/s
             yaw: Rotational velocity in rad/s
+            body_height: Body height offset in meters (relative to nominal)
+            locomotion_hint: Gait hint (1=trot, 2=speed, 3=amble, 4=crawl, etc.)
 
         Returns:
             Result dictionary
@@ -380,12 +383,20 @@ class SpotBridge:
             vx = max(-0.5, min(0.5, vx))
             vy = max(-0.5, min(0.5, vy))
             yaw = max(-0.5, min(0.5, yaw))
+            body_height = max(-0.3, min(0.3, body_height))
 
-            # Create velocity command with short timeout
-            cmd = RobotCommandBuilder.synchro_velocity_command(
-                v_x=vx, v_y=vy, v_rot=yaw,
-                params=None
-            )
+            # Create velocity command with mobility params if provided
+            if locomotion_hint is not None or body_height != 0.0:
+                cmd = RobotCommandBuilder.synchro_velocity_command(
+                    v_x=vx, v_y=vy, v_rot=yaw,
+                    body_height=body_height,
+                    locomotion_hint=locomotion_hint if locomotion_hint is not None else 1
+                )
+            else:
+                cmd = RobotCommandBuilder.synchro_velocity_command(
+                    v_x=vx, v_y=vy, v_rot=yaw,
+                    params=None
+                )
 
             # Send with end time
             end_time = time.time() + 0.25
@@ -394,14 +405,16 @@ class SpotBridge:
             # Update watchdog
             self.last_velocity_time = time.time()
 
-            logger.debug(f"Sent velocity: vx={vx:.2f}, vy={vy:.2f}, yaw={yaw:.2f}")
+            logger.debug(f"Sent velocity: vx={vx:.2f}, vy={vy:.2f}, yaw={yaw:.2f}, height={body_height:.2f}, hint={locomotion_hint}")
 
             return {
                 "ok": True,
                 "data": {
                     "vx": vx,
                     "vy": vy,
-                    "yaw": yaw
+                    "yaw": yaw,
+                    "body_height": body_height,
+                    "locomotion_hint": locomotion_hint
                 }
             }
 

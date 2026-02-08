@@ -76,6 +76,8 @@ class VelocityCommand(BaseModel):
     vx: float
     vy: float
     yaw: float
+    body_height: float = 0.0
+    locomotion_hint: Optional[int] = None
 
 
 # Health and info endpoints
@@ -268,12 +270,15 @@ async def command_stop():
 
 @app.post("/api/command/velocity")
 async def command_velocity(cmd: VelocityCommand):
-    """Send velocity command."""
+    """Send velocity command with optional gait customization."""
     if not spot_bridge:
         return {"ok": False, "error": {"message": "Bridge not initialized"}}
 
     try:
-        result = spot_bridge.send_velocity(cmd.vx, cmd.vy, cmd.yaw)
+        result = spot_bridge.send_velocity(
+            cmd.vx, cmd.vy, cmd.yaw,
+            cmd.body_height, cmd.locomotion_hint
+        )
         return result
     except Exception as e:
         logger.error(f"Error in velocity endpoint: {e}", exc_info=True)

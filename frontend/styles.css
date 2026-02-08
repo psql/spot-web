@@ -402,6 +402,102 @@ header h1 {
     gap: 20px;
 }
 
+/* Gait control */
+.gait-control {
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 6px;
+    border-left: 3px solid #00ff88;
+}
+
+.gait-control h4 {
+    font-size: 1rem;
+    margin-bottom: 15px;
+    color: #00ff88;
+}
+
+.gait-preset {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.gait-preset label {
+    min-width: 100px;
+    font-weight: 600;
+}
+
+.gait-preset select {
+    flex: 1;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    color: #e0e0e0;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
+.gait-preset select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.gait-params {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.gait-param {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.gait-param label {
+    min-width: 100px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.gait-param input[type="range"] {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: #555;
+    outline: none;
+}
+
+.gait-param input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #00ff88;
+    cursor: pointer;
+}
+
+.gait-param input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #00ff88;
+    cursor: pointer;
+    border: none;
+}
+
+.gait-param span {
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    min-width: 60px;
+    text-align: right;
+    font-size: 0.9rem;
+}
+
 .motion-header {
     display: flex;
     align-items: center;

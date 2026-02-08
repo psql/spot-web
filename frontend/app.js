@@ -12,6 +12,9 @@ const state = {
     animationStartTime: 0,
     animationFrame: null,
     lastPoseSend: 0,
+    gaitPreset: 'normal',
+    walkHeight: 0.0,
+    locomotionHint: null,
 };
 
 // WebSocket connections
@@ -71,6 +74,11 @@ const elements = {
     velX: document.getElementById('vel-x'),
     velY: document.getElementById('vel-y'),
     velYaw: document.getElementById('vel-yaw'),
+
+    // Gait control
+    gaitPreset: document.getElementById('gait-preset'),
+    walkHeight: document.getElementById('walk-height'),
+    walkHeightVal: document.getElementById('walk-height-val'),
 
     // Debug
     testConnectionBtn: document.getElementById('test-connection-btn'),
@@ -164,6 +172,10 @@ function updateConnectionUI(connected) {
         elements.pitchSlider.disabled = false;
         elements.yawSlider.disabled = false;
         elements.resetPoseBtn.disabled = false;
+
+        // Enable gait controls
+        elements.gaitPreset.disabled = false;
+        elements.walkHeight.disabled = false;
     } else {
         elements.connectionBadge.textContent = 'Not Connected';
         elements.connectionBadge.className = 'status-badge disconnected';
@@ -190,6 +202,10 @@ function updateConnectionUI(connected) {
         elements.pitchSlider.disabled = true;
         elements.yawSlider.disabled = true;
         elements.resetPoseBtn.disabled = true;
+
+        // Disable gait controls
+        elements.gaitPreset.disabled = true;
+        elements.walkHeight.disabled = true;
 
         // Reset status
         elements.robotId.textContent = '-';
@@ -412,6 +428,44 @@ function handleMotionToggle() {
 function handleSpeedSlider() {
     state.speedScale = parseFloat(elements.speedSlider.value);
     elements.speedValue.textContent = state.speedScale.toFixed(1);
+}
+
+// Gait control handlers
+const gaitPresets = {
+    normal: { height: 0.0, hint: null, name: 'Normal Walk' },
+    prowl: { height: -0.15, hint: 4, name: 'Prowl (Low & Slow)' },
+    high_step: { height: 0.15, hint: 1, name: 'High Step' },
+    trot: { height: 0.0, hint: 1, name: 'Trot (Fast)' },
+    crawl: { height: -0.2, hint: 4, name: 'Crawl (Careful)' },
+    custom: { height: 0.0, hint: null, name: 'Custom' }
+};
+
+function handleGaitPresetChange() {
+    const preset = elements.gaitPreset.value;
+    state.gaitPreset = preset;
+
+    if (preset !== 'custom') {
+        const gait = gaitPresets[preset];
+        state.walkHeight = gait.height;
+        state.locomotionHint = gait.hint;
+
+        elements.walkHeight.value = gait.height;
+        elements.walkHeightVal.textContent = gait.height.toFixed(2) + 'm';
+
+        showToast(`Gait: ${gait.name}`, 'info');
+    }
+}
+
+function handleWalkHeightChange() {
+    const height = parseFloat(elements.walkHeight.value);
+    state.walkHeight = height;
+    elements.walkHeightVal.textContent = height.toFixed(2) + 'm';
+
+    // Switch to custom if user manually adjusts
+    if (state.gaitPreset !== 'custom') {
+        elements.gaitPreset.value = 'custom';
+        state.gaitPreset = 'custom';
+    }
 }
 
 // Body pose control handlers
@@ -721,7 +775,15 @@ async function sendVelocityIfChanged(newVel) {
         Math.abs(newVel.yaw - state.currentVelocity.yaw) > 0.01;
 
     if (changed || (Date.now() - state.lastVelocitySend > 100 && (newVel.vx !== 0 || newVel.vy !== 0 || newVel.yaw !== 0))) {
-        await api.velocity(newVel.vx, newVel.vy, newVel.yaw);
+        // Send with gait params
+        await api.call('/api/command/velocity', 'POST', {
+            vx: newVel.vx,
+            vy: newVel.vy,
+            yaw: newVel.yaw,
+            body_height: state.walkHeight,
+            locomotion_hint: state.locomotionHint
+        });
+
         state.currentVelocity = newVel;
         state.lastVelocitySend = Date.now();
         updateVelocityDisplay();
@@ -907,6 +969,8 @@ elements.rollSlider.addEventListener('input', handleRollSlider);
 elements.pitchSlider.addEventListener('input', handlePitchSlider);
 elements.yawSlider.addEventListener('input', handleYawSlider);
 elements.resetPoseBtn.addEventListener('click', handleResetPose);
+elements.gaitPreset.addEventListener('change', handleGaitPresetChange);
+elements.walkHeight.addEventListener('input', handleWalkHeightChange);
 elements.motionToggle.addEventListener('change', handleMotionToggle);
 elements.speedSlider.addEventListener('input', handleSpeedSlider);
 elements.testConnectionBtn.addEventListener('click', handleTestConnection);
