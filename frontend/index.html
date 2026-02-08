@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spot Web Controller</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Spot Web Controller</h1>
+            <div class="connection-panel">
+                <div class="connection-status">
+                    <span class="status-badge" id="connection-badge">Not Connected</span>
+                </div>
+                <div class="connection-buttons">
+                    <button id="connect-btn" class="btn btn-primary">Connect</button>
+                    <button id="disconnect-btn" class="btn btn-secondary" disabled>Disconnect</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <!-- Status Panel -->
+            <section class="panel status-panel">
+                <h2>Status</h2>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <label>Robot ID:</label>
+                        <span id="robot-id">-</span>
+                    </div>
+                    <div class="status-item">
+                        <label>Nickname:</label>
+                        <span id="robot-nickname">-</span>
+                    </div>
+                    <div class="status-item">
+                        <label>Battery:</label>
+                        <span id="battery-status">-</span>
+                    </div>
+                    <div class="status-item">
+                        <label>Power:</label>
+                        <span class="status-badge" id="power-badge">Unknown</span>
+                    </div>
+                    <div class="status-item">
+                        <label>Lease:</label>
+                        <span class="status-badge" id="lease-badge">None</span>
+                    </div>
+                    <div class="status-item">
+                        <label>E-Stop:</label>
+                        <span class="status-badge" id="estop-badge">Unknown</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Control Panel -->
+            <section class="panel control-panel">
+                <h2>Control</h2>
+                <div class="control-section">
+                    <h3>Power</h3>
+                    <div class="button-group">
+                        <button id="power-on-btn" class="btn btn-success" disabled>Power On</button>
+                        <button id="power-off-btn" class="btn btn-secondary" disabled>Power Off</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Mobility</h3>
+                    <div class="button-group">
+                        <button id="stand-btn" class="btn btn-success" disabled>Stand</button>
+                        <button id="sit-btn" class="btn btn-secondary" disabled>Sit</button>
+                    </div>
+                </div>
+
+                <div class="control-section">
+                    <h3>Emergency</h3>
+                    <button id="stop-btn" class="btn btn-danger btn-emergency" disabled>STOP</button>
+                </div>
+            </section>
+
+            <!-- Motion Control Panel -->
+            <section class="panel motion-panel">
+                <h2>Motion Control</h2>
+                <div class="motion-controls">
+                    <div class="motion-header">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="motion-enable-toggle" disabled>
+                            <span class="toggle-slider"></span>
+                            <span class="toggle-label">Enable Keyboard Control</span>
+                        </label>
+                    </div>
+
+                    <div class="keyboard-help">
+                        <h4>Keyboard Controls:</h4>
+                        <div class="key-grid">
+                            <div class="key-item"><kbd>W</kbd> Forward</div>
+                            <div class="key-item"><kbd>S</kbd> Backward</div>
+                            <div class="key-item"><kbd>A</kbd> Left</div>
+                            <div class="key-item"><kbd>D</kbd> Right</div>
+                            <div class="key-item"><kbd>Q</kbd> Rotate Left</div>
+                            <div class="key-item"><kbd>E</kbd> Rotate Right</div>
+                        </div>
+                    </div>
+
+                    <div class="speed-control">
+                        <label for="speed-slider">Speed Scale:</label>
+                        <input type="range" id="speed-slider" min="0.1" max="1.0" step="0.1" value="0.3">
+                        <span id="speed-value">0.3</span>
+                    </div>
+
+                    <div class="velocity-display">
+                        <h4>Current Velocity:</h4>
+                        <div class="velocity-values">
+                            <div>Vx: <span id="vel-x">0.00</span> m/s</div>
+                            <div>Vy: <span id="vel-y">0.00</span> m/s</div>
+                            <div>Yaw: <span id="vel-yaw">0.00</span> rad/s</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Debug Panel -->
+            <section class="panel debug-panel">
+                <h2>Debug & Diagnostics</h2>
+                <div class="debug-controls">
+                    <button id="test-connection-btn" class="btn btn-primary">Test Connection</button>
+                    <button id="diagnose-btn" class="btn btn-secondary">Run Diagnostics</button>
+                    <button id="copy-logs-btn" class="btn btn-secondary">Copy Logs</button>
+                    <button id="download-logs-btn" class="btn btn-secondary">Download Logs</button>
+                </div>
+                <div id="test-results" class="test-results" style="display: none;">
+                    <h3>Connection Test Results</h3>
+                    <div id="test-results-content"></div>
+                </div>
+                <div class="log-container">
+                    <textarea id="log-output" readonly></textarea>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="/app.js"></script>
+</body>
+</html>
