@@ -121,7 +121,7 @@ class HandControl {
         ];
 
         this.canvasCtx.strokeStyle = '#00d9ff';
-        this.canvasCtx.lineWidth = 2;
+        this.canvasCtx.lineWidth = 3;
 
         connections.forEach(([start, end]) => {
             const startPoint = landmarks[start];
@@ -132,17 +132,49 @@ class HandControl {
             this.canvasCtx.stroke();
         });
 
-        // Draw points
-        landmarks.forEach(landmark => {
+        // Draw points with labels
+        landmarks.forEach((landmark, i) => {
+            const x = landmark.x * this.canvas.width;
+            const y = landmark.y * this.canvas.height;
+
+            // Draw point
             this.canvasCtx.beginPath();
-            this.canvasCtx.arc(
-                landmark.x * this.canvas.width,
-                landmark.y * this.canvas.height,
-                5, 0, 2 * Math.PI
-            );
+            this.canvasCtx.arc(x, y, 6, 0, 2 * Math.PI);
             this.canvasCtx.fillStyle = '#00ff88';
             this.canvasCtx.fill();
+            this.canvasCtx.strokeStyle = '#fff';
+            this.canvasCtx.lineWidth = 2;
+            this.canvasCtx.stroke();
+
+            // Draw landmark numbers for key points
+            if ([0, 5, 9, 13, 17].includes(i)) { // Wrist and finger bases
+                this.canvasCtx.fillStyle = '#fff';
+                this.canvasCtx.font = 'bold 12px Arial';
+                this.canvasCtx.fillText(i, x + 10, y - 10);
+            }
         });
+
+        // Draw orientation indicators
+        const wrist = landmarks[0];
+        const middleBase = landmarks[9];
+        const wristX = wrist.x * this.canvas.width;
+        const wristY = wrist.y * this.canvas.height;
+
+        // Draw roll indicator (horizontal line)
+        this.canvasCtx.beginPath();
+        this.canvasCtx.moveTo(wristX - 40, wristY);
+        this.canvasCtx.lineTo(wristX + 40, wristY);
+        this.canvasCtx.strokeStyle = '#ff4444';
+        this.canvasCtx.lineWidth = 3;
+        this.canvasCtx.stroke();
+
+        // Draw pitch indicator (vertical line)
+        this.canvasCtx.beginPath();
+        this.canvasCtx.moveTo(wristX, wristY - 40);
+        this.canvasCtx.lineTo(wristX, wristY + 40);
+        this.canvasCtx.strokeStyle = '#00ff88';
+        this.canvasCtx.lineWidth = 3;
+        this.canvasCtx.stroke();
     }
 
     calculateHandOrientation(landmarks) {
@@ -184,11 +216,16 @@ class HandControl {
 
     async sendToSpot(orientation) {
         try {
-            await fetch('/api/command/body-pose', {
+            console.log('Sending hand pose to Spot:', orientation);
+            const response = await fetch('/api/command/body-pose', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(orientation)
             });
+            const result = await response.json();
+            if (!result.ok) {
+                console.error('Spot rejected pose:', result.error);
+            }
         } catch (error) {
             console.error('Failed to send pose to Spot:', error);
         }
