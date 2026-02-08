@@ -44,11 +44,14 @@ const elements = {
     animationPreset: document.getElementById('animation-preset'),
     animationPlayBtn: document.getElementById('animation-play-btn'),
     animationStopBtn: document.getElementById('animation-stop-btn'),
+    animationStatus: document.getElementById('animation-status'),
     oscillatorControls: document.getElementById('oscillator-controls'),
+    globalAmplitude: document.getElementById('global-amplitude'),
+    globalAmplitudeVal: document.getElementById('global-amplitude-val'),
+    animationSpeed: document.getElementById('animation-speed'),
+    animationSpeedVal: document.getElementById('animation-speed-val'),
     oscFreq: document.getElementById('osc-freq'),
     oscFreqVal: document.getElementById('osc-freq-val'),
-    oscAmp: document.getElementById('osc-amp'),
-    oscAmpVal: document.getElementById('osc-amp-val'),
 
     // Body pose control
     heightSlider: document.getElementById('height-slider'),
@@ -154,6 +157,8 @@ function updateConnectionUI(connected) {
         // Enable animation and body pose controls
         elements.animationPreset.disabled = false;
         elements.animationPlayBtn.disabled = false;
+        elements.globalAmplitude.disabled = false;
+        elements.animationSpeed.disabled = false;
         elements.heightSlider.disabled = false;
         elements.rollSlider.disabled = false;
         elements.pitchSlider.disabled = false;
@@ -318,7 +323,14 @@ async function handleConnect() {
 }
 
 async function handleDisconnect() {
-    // Disable motion first
+    // SAFETY: Stop all motion before disconnecting
+
+    // Stop animation
+    if (state.animationPlaying) {
+        stopAnimation();
+    }
+
+    // Disable keyboard motion
     if (state.motionEnabled) {
         elements.motionToggle.checked = false;
         state.motionEnabled = false;
@@ -362,15 +374,23 @@ async function handleSit() {
 }
 
 async function handleStop() {
-    // Disable motion
+    // SAFETY: Stop all motion systems
+
+    // Stop animation if playing
+    if (state.animationPlaying) {
+        stopAnimation();
+    }
+
+    // Disable keyboard motion
     if (state.motionEnabled) {
         elements.motionToggle.checked = false;
         state.motionEnabled = false;
     }
 
+    // Send stop command to robot
     const result = await api.stop();
     if (result.ok) {
-        showToast('STOPPED', 'info');
+        showToast('EMERGENCY STOP - All motion halted', 'info');
     }
 }
 
@@ -463,8 +483,8 @@ async function handleResetPose() {
 const animations = {
     bounce: {
         name: 'Bounce',
-        calculate: (t) => ({
-            height: Math.sin(t * 2 * Math.PI) * 0.15,
+        calculate: (t, amp) => ({
+            height: Math.sin(t * 2 * Math.PI) * 0.15 * amp,
             roll: 0,
             pitch: 0,
             yaw: 0
@@ -472,54 +492,53 @@ const animations = {
     },
     sway: {
         name: 'Sway',
-        calculate: (t) => ({
+        calculate: (t, amp) => ({
             height: 0,
-            roll: Math.sin(t * 2 * Math.PI) * 0.2,
+            roll: Math.sin(t * 2 * Math.PI) * 0.2 * amp,
             pitch: 0,
             yaw: 0
         })
     },
     figure8: {
         name: 'Figure 8',
-        calculate: (t) => ({
-            height: Math.sin(t * 2 * Math.PI) * 0.1,
-            roll: Math.sin(t * 2 * Math.PI) * 0.15,
-            pitch: Math.sin(t * 4 * Math.PI) * 0.15,
+        calculate: (t, amp) => ({
+            height: Math.sin(t * 2 * Math.PI) * 0.1 * amp,
+            roll: Math.sin(t * 2 * Math.PI) * 0.15 * amp,
+            pitch: Math.sin(t * 4 * Math.PI) * 0.15 * amp,
             yaw: 0
         })
     },
     circle: {
         name: 'Circle',
-        calculate: (t) => ({
+        calculate: (t, amp) => ({
             height: 0,
-            roll: Math.cos(t * 2 * Math.PI) * 0.2,
-            pitch: Math.sin(t * 2 * Math.PI) * 0.2,
+            roll: Math.cos(t * 2 * Math.PI) * 0.2 * amp,
+            pitch: Math.sin(t * 2 * Math.PI) * 0.2 * amp,
             yaw: 0
         })
     },
     wave: {
         name: 'Wave',
-        calculate: (t) => ({
-            height: Math.sin(t * 2 * Math.PI) * 0.1,
-            roll: Math.sin(t * 2 * Math.PI) * 0.15,
-            pitch: Math.sin(t * 2 * Math.PI + Math.PI/2) * 0.15,
-            yaw: Math.sin(t * 2 * Math.PI) * 0.1
+        calculate: (t, amp) => ({
+            height: Math.sin(t * 2 * Math.PI) * 0.1 * amp,
+            roll: Math.sin(t * 2 * Math.PI) * 0.15 * amp,
+            pitch: Math.sin(t * 2 * Math.PI + Math.PI/2) * 0.15 * amp,
+            yaw: Math.sin(t * 2 * Math.PI) * 0.1 * amp
         })
     },
     dance: {
         name: 'Dance',
-        calculate: (t) => ({
-            height: Math.sin(t * 4 * Math.PI) * 0.12,
-            roll: Math.sin(t * 3 * Math.PI) * 0.18,
-            pitch: Math.sin(t * 2.5 * Math.PI) * 0.15,
-            yaw: Math.sin(t * 1.5 * Math.PI) * 0.2
+        calculate: (t, amp) => ({
+            height: Math.sin(t * 4 * Math.PI) * 0.12 * amp,
+            roll: Math.sin(t * 3 * Math.PI) * 0.18 * amp,
+            pitch: Math.sin(t * 2.5 * Math.PI) * 0.15 * amp,
+            yaw: Math.sin(t * 1.5 * Math.PI) * 0.2 * amp
         })
     },
     custom: {
         name: 'Custom',
-        calculate: (t) => {
+        calculate: (t, amp) => {
             const freq = parseFloat(elements.oscFreq.value);
-            const amp = parseFloat(elements.oscAmp.value);
             return {
                 height: Math.sin(t * freq * 2 * Math.PI) * 0.15 * amp,
                 roll: Math.sin(t * freq * 2 * Math.PI) * 0.2 * amp,
@@ -544,9 +563,14 @@ function handleOscFreqChange() {
     elements.oscFreqVal.textContent = freq.toFixed(1) + ' Hz';
 }
 
-function handleOscAmpChange() {
-    const amp = parseFloat(elements.oscAmp.value);
-    elements.oscAmpVal.textContent = amp.toFixed(1) + 'x';
+function handleGlobalAmplitudeChange() {
+    const amp = parseFloat(elements.globalAmplitude.value);
+    elements.globalAmplitudeVal.textContent = amp.toFixed(2) + 'x';
+}
+
+function handleAnimationSpeedChange() {
+    const speed = parseFloat(elements.animationSpeed.value);
+    elements.animationSpeedVal.textContent = speed.toFixed(2) + 'x';
 }
 
 function startAnimation() {
@@ -559,31 +583,41 @@ function startAnimation() {
     state.animationPlaying = true;
     state.animationStartTime = Date.now();
 
+    // Update UI
     elements.animationPlayBtn.style.display = 'none';
     elements.animationStopBtn.style.display = 'inline-block';
+    elements.animationStopBtn.disabled = false;
     elements.animationPreset.disabled = true;
+    elements.animationStatus.textContent = '⬤ PLAYING';
+    elements.animationStatus.className = 'animation-status playing';
 
-    // Disable manual controls during animation
+    // Disable manual controls during animation for safety
     elements.heightSlider.disabled = true;
     elements.rollSlider.disabled = true;
     elements.pitchSlider.disabled = true;
     elements.yawSlider.disabled = true;
 
-    showToast(`Playing ${animations[preset].name} animation`, 'info');
+    showToast(`▶ Playing ${animations[preset].name} animation`, 'success');
     animationLoop();
 }
 
 function stopAnimation() {
+    if (!state.animationPlaying) return;
+
     state.animationPlaying = false;
 
+    // Cancel animation frame
     if (state.animationFrame) {
         cancelAnimationFrame(state.animationFrame);
         state.animationFrame = null;
     }
 
+    // Update UI
     elements.animationPlayBtn.style.display = 'inline-block';
     elements.animationStopBtn.style.display = 'none';
     elements.animationPreset.disabled = false;
+    elements.animationStatus.textContent = '';
+    elements.animationStatus.className = 'animation-status';
 
     // Re-enable manual controls
     if (state.connected) {
@@ -593,7 +627,15 @@ function stopAnimation() {
         elements.yawSlider.disabled = false;
     }
 
-    showToast('Animation stopped', 'info');
+    // Reset to neutral pose for safety
+    api.call('/api/command/body-pose', 'POST', {
+        height: 0,
+        roll: 0,
+        pitch: 0,
+        yaw: 0
+    });
+
+    showToast('■ Animation stopped', 'info');
 }
 
 function animationLoop() {
@@ -607,11 +649,15 @@ function animationLoop() {
         return;
     }
 
-    // Calculate time in seconds since animation started
-    const elapsed = (Date.now() - state.animationStartTime) / 1000;
+    // Get global controls
+    const globalAmp = parseFloat(elements.globalAmplitude.value);
+    const speed = parseFloat(elements.animationSpeed.value);
 
-    // Calculate pose using animation function
-    const pose = animation.calculate(elapsed);
+    // Calculate time in seconds since animation started (with speed multiplier)
+    const elapsed = ((Date.now() - state.animationStartTime) / 1000) * speed;
+
+    // Calculate pose using animation function with global amplitude
+    const pose = animation.calculate(elapsed, globalAmp);
 
     // Update UI display
     elements.heightValue.textContent = pose.height.toFixed(2) + 'm';
@@ -619,11 +665,21 @@ function animationLoop() {
     elements.pitchValue.textContent = (pose.pitch * 180 / Math.PI).toFixed(1) + '°';
     elements.yawValue.textContent = (pose.yaw * 180 / Math.PI).toFixed(1) + '°';
 
+    // SAFETY: Check if still connected
+    if (!state.connected) {
+        console.warn('Connection lost during animation, stopping');
+        stopAnimation();
+        showToast('Animation stopped: connection lost', 'error');
+        return;
+    }
+
     // Send to robot at 10Hz to avoid rate limiting
     const now = Date.now();
     if (now - state.lastPoseSend >= 100) {
         api.call('/api/command/body-pose', 'POST', pose).catch(err => {
             console.error('Animation pose update failed:', err);
+            stopAnimation();
+            showToast('Animation stopped: communication error', 'error');
         });
         state.lastPoseSend = now;
     }
@@ -843,8 +899,9 @@ elements.stopBtn.addEventListener('click', handleStop);
 elements.animationPreset.addEventListener('change', handleAnimationPresetChange);
 elements.animationPlayBtn.addEventListener('click', startAnimation);
 elements.animationStopBtn.addEventListener('click', stopAnimation);
+elements.globalAmplitude.addEventListener('input', handleGlobalAmplitudeChange);
+elements.animationSpeed.addEventListener('input', handleAnimationSpeedChange);
 elements.oscFreq.addEventListener('input', handleOscFreqChange);
-elements.oscAmp.addEventListener('input', handleOscAmpChange);
 elements.heightSlider.addEventListener('input', handleHeightSlider);
 elements.rollSlider.addEventListener('input', handleRollSlider);
 elements.pitchSlider.addEventListener('input', handlePitchSlider);

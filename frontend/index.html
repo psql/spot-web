@@ -84,7 +84,7 @@
 
                 <!-- Animation Mode -->
                 <div class="animation-mode">
-                    <h3>Animation Mode</h3>
+                    <h3>Animation Mode <span id="animation-status" class="animation-status"></span></h3>
                     <div class="animation-controls">
                         <select id="animation-preset" disabled>
                             <option value="none">Manual Control</option>
@@ -97,20 +97,30 @@
                             <option value="custom">Custom Oscillator</option>
                         </select>
                         <button id="animation-play-btn" class="btn btn-success" disabled>▶ Play</button>
-                        <button id="animation-stop-btn" class="btn btn-secondary" disabled style="display:none;">■ Stop</button>
+                        <button id="animation-stop-btn" class="btn btn-danger" disabled style="display:none;">■ Stop</button>
+                    </div>
+
+                    <!-- Global Animation Controls -->
+                    <div class="animation-params">
+                        <div class="oscillator-param">
+                            <label>Amplitude:</label>
+                            <input type="range" id="global-amplitude" min="0.1" max="1.0" step="0.05" value="1.0" disabled>
+                            <span id="global-amplitude-val">1.0x</span>
+                        </div>
+                        <div class="oscillator-param">
+                            <label>Speed:</label>
+                            <input type="range" id="animation-speed" min="0.25" max="2.0" step="0.25" value="1.0" disabled>
+                            <span id="animation-speed-val">1.0x</span>
+                        </div>
                     </div>
 
                     <!-- Custom Oscillator Controls -->
                     <div id="oscillator-controls" style="display:none;">
+                        <h4>Custom Pattern</h4>
                         <div class="oscillator-param">
                             <label>Frequency:</label>
                             <input type="range" id="osc-freq" min="0.1" max="2.0" step="0.1" value="0.5">
                             <span id="osc-freq-val">0.5 Hz</span>
-                        </div>
-                        <div class="oscillator-param">
-                            <label>Amplitude:</label>
-                            <input type="range" id="osc-amp" min="0.1" max="1.0" step="0.1" value="0.5">
-                            <span id="osc-amp-val">0.5x</span>
                         </div>
                     </div>
                 </div>
