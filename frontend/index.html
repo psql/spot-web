@@ -28,9 +28,9 @@
                 <div class="live-pose-controls">
                     <div class="pose-toggle-header">
                         <label class="toggle-switch toggle-large">
-                            <input type="checkbox" id="live-pose-toggle" disabled>
+                            <input type="checkbox" id="hand-control-toggle" disabled>
                             <span class="toggle-slider"></span>
-                            <span class="toggle-label">Enable Live Pose Control</span>
+                            <span class="toggle-label">Enable Hand Tracking</span>
                         </label>
                         <div class="pose-mode-select">
                             <select id="pose-mode" disabled>
@@ -53,15 +53,15 @@
                             <div class="orientation-display">
                                 <div class="orientation-item roll">
                                     <label>Roll</label>
-                                    <span id="pose-roll">0.0°</span>
+                                    <span id="hand-roll">0.0°</span>
                                 </div>
                                 <div class="orientation-item pitch">
                                     <label>Pitch</label>
-                                    <span id="pose-pitch">0.0°</span>
+                                    <span id="hand-pitch">0.0°</span>
                                 </div>
                                 <div class="orientation-item yaw">
                                     <label>Yaw</label>
-                                    <span id="pose-yaw">0.0°</span>
+                                    <span id="hand-yaw">0.0°</span>
                                 </div>
                             </div>
                         </div>
@@ -77,9 +77,9 @@
                             <div class="key-help"><kbd>Space</kbd> Reset to Neutral</div>
                         </div>
                         <div class="pose-param-large">
-                            <label>Speed:</label>
-                            <input type="range" id="pose-speed" min="0.5" max="3.0" step="0.5" value="1.0" disabled>
-                            <span id="pose-speed-val">1.0x</span>
+                            <label>Sensitivity:</label>
+                            <input type="range" id="hand-sensitivity" min="0.5" max="3.0" step="0.5" value="1.0" disabled>
+                            <span id="hand-sensitivity-val">1.0x</span>
                         </div>
                         <div class="pose-hint-large">
                             💡 <strong>Zero overhead, instant response!</strong> Use arrow keys and WASD to dynamically control Spot's body pose. Robot icon above shows current orientation. Press Space to reset!

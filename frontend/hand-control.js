@@ -55,36 +55,37 @@ class HandControl {
 
             this.hands.setOptions({
                 maxNumHands: 1,
-                modelComplexity: 0,  // 0 = lite model (MUCH faster!)
-                minDetectionConfidence: 0.5,
-                minTrackingConfidence: 0.5
+                modelComplexity: 0,  // 0 = lite (fastest)
+                minDetectionConfidence: 0.3,  // Lower = faster
+                minTrackingConfidence: 0.3,
+                selfieMode: false
             });
 
             this.hands.onResults((results) => this.onResults(results));
 
             // Start camera
             console.log('Starting camera...');
-            // Lower res + frame skipping for smooth 60fps
+            // Ultra-low res + aggressive frame skipping
             let frameCount = 0;
             this.camera = new Camera(this.video, {
                 onFrame: async () => {
                     if (this.hands && this.active) {
-                        // Process every 2nd frame only (2x speed boost)
-                        if (frameCount++ % 2 === 0) {
+                        // Process every 3rd frame (3x faster!)
+                        if (frameCount++ % 3 === 0) {
                             await this.hands.send({ image: this.video });
                         }
                     }
                 },
-                width: 480,
-                height: 360
+                width: 320,  // Very low res for speed
+                height: 240
             });
 
             await this.camera.start();
             console.log('✅ Camera started!');
 
             // Set canvas size to match video
-            this.canvas.width = 480;
-            this.canvas.height = 360;
+            this.canvas.width = 320;
+            this.canvas.height = 240;
 
             return true;
         } catch (error) {
