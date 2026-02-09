@@ -1388,15 +1388,21 @@ updateConnectionUI(false);
 connectTelemetryWebSocket();
 connectLogsWebSocket();
 
-// Hand control integration
+// Hand control integration - wait for window.handControl to be defined
 if (elements.handControlToggle) {
     elements.handControlToggle.addEventListener('change', () => {
         if (elements.handControlToggle.checked) {
-            window.handControl.start();
-            showToast('🖐️ Hand tracking enabled!', 'success');
+            if (window.handControl && window.handControl.start) {
+                window.handControl.start();
+                showToast('🖐️ Hand tracking enabled!', 'success');
+            } else {
+                console.error('handControl not ready');
+            }
         } else {
-            window.handControl.stop();
-            showToast('Hand tracking disabled', 'info');
+            if (window.handControl && window.handControl.stop) {
+                window.handControl.stop();
+                showToast('Hand tracking disabled', 'info');
+            }
         }
     });
 }
@@ -1405,10 +1411,10 @@ if (elements.handSensitivity) {
     elements.handSensitivity.addEventListener('input', () => {
         const sensitivity = parseFloat(elements.handSensitivity.value);
         elements.handSensitivityVal.textContent = sensitivity.toFixed(1) + 'x';
-        if (window.handControl) {
+        if (window.handControl && window.handControl.setSensitivity) {
             window.handControl.setSensitivity(sensitivity);
         }
     });
 }
 
-console.log('Hand control ready!');
+console.log('App ready - hand control will initialize when toggle enabled');
